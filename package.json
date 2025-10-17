@@ -5,14 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "shopify app dev",
-    "build": "shopify app build",
+    "build": "next build",
     "deploy": "shopify app deploy",
     "setup": "prisma generate && prisma migrate deploy",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
   },
   "dependencies": {
-    "@prisma/client": "^5.9.1",
     "@remix-run/node": "^2.5.1",
     "@remix-run/react": "^2.5.1",
     "@remix-run/serve": "^2.5.1",
@@ -23,13 +22,13 @@
     "crypto-js": "^4.2.0",
     "isbot": "^4.4.0",
     "nodemailer": "^6.9.9",
-    "prisma": "^5.9.1",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@prisma/client": "^5.15.0",
     "@remix-run/dev": "^2.5.1",
     "@shopify/app": "^3.58.2",
     "@types/crypto-js": "^4.2.2",
@@ -38,6 +37,7 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
+    "prisma": "^5.15.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.12"
   },
