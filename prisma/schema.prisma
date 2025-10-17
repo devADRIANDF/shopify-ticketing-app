@@ -1,0 +1,91 @@
+// Shopify Session Storage
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Session {
+  id          String    @id
+  shop        String
+  state       String
+  isOnline    Boolean   @default(false)
+  scope       String?
+  expires     DateTime?
+  accessToken String
+  userId      BigInt?
+  firstName   String?
+  lastName    String?
+  email       String?
+  accountOwner Boolean  @default(false)
+  locale      String?
+  collaborator Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+}
+
+model Ticket {
+  id            String   @id @default(cuid())
+  shopifyOrderId String
+  shopifyOrderName String
+  lineItemId    String
+  productId     String
+  variantId     String
+  productTitle  String
+  variantTitle  String?
+  quantity      Int      @default(1)
+  buyerEmail    String
+  buyerName     String?
+  ticketType    String
+  qrCode        String   @unique
+  qrData        String   // Encrypted JSON data
+  status        TicketStatus @default(PENDING)
+  scannedAt     DateTime?
+  scannedBy     String?
+  shop          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  eventDate     DateTime?
+  eventName     String?
+
+  @@index([shop])
+  @@index([shopifyOrderId])
+  @@index([qrCode])
+  @@index([status])
+  @@index([buyerEmail])
+}
+
+enum TicketStatus {
+  PENDING
+  VALID
+  SCANNED
+  INVALID
+  CANCELLED
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  shop      String
+  name      String
+  subject   String
+  htmlBody  String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shop, name])
+}
+
+model AppSettings {
+  id                String   @id @default(cuid())
+  shop              String   @unique
+  ticketTag         String   @default("ticket")
+  autoEmailEnabled  Boolean  @default(true)
+  brandColor        String   @default("#5C6AC4")
+  brandLogo         String?
+  emailTemplateId   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
