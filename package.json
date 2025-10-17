@@ -4,13 +4,15 @@
   "description": "Shopify app for managing event tickets with QR codes",
   "type": "module",
   "scripts": {
-    "dev": "shopify app dev",
-    "build": "next build",
-    "deploy": "shopify app deploy",
-    "setup": "prisma generate && prisma migrate deploy",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
-  },
+  "dev": "next dev",                          // Esto es para desarrollo local real
+  "build": "next build",                      // Esto es lo que Vercel usa
+  "start": "next start",                      // Necesario para producción (aunque Vercel lo gestiona)
+  "deploy": "shopify app deploy",            // Lo puedes dejar
+  "setup": "prisma generate && prisma migrate deploy",
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev"
+}
+,
   "dependencies": {
     "@remix-run/node": "^2.5.1",
     "@remix-run/react": "^2.5.1",
