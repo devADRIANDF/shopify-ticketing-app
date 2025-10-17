@@ -1,5 +1,9 @@
-import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useSubmit, useNavigation } from "@remix-run/react";
+import {
+  json,
+  type ActionFunctionArgs,
+  type LoaderFunctionArgs,
+} from "@remix-run/node";
+import { useSubmit, useNavigation } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -8,29 +12,35 @@ import {
   Select,
   Button,
   Text,
-  Banner,
   FormLayout,
 } from "@shopify/polaris";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { authenticate } from "~/shopify.server";
 import { exportTicketsToCSV } from "~/services/ticket.server";
 import type { TicketStatus } from "@prisma/client";
 
+// --------------------
+// 📦 LOADER
+// --------------------
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   return json({ shop: session.shop });
 };
 
+// --------------------
+// ⚙️ ACTION
+// --------------------
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const formData = await request.formData();
 
-  const status = formData.get("status") as TicketStatus | null;
+  const status = formData.get("status") as string | null;
   const startDateStr = formData.get("startDate") as string | null;
   const endDateStr = formData.get("endDate") as string | null;
 
-  const filters: any = {};
+  const filters: Record<string, any> = {};
 
+  // ✅ TypeScript fix — se fuerza el tipo string antes de comparar
   if (status && status !== "all") {
     filters.status = status as TicketStatus;
   }
@@ -53,6 +63,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   });
 };
 
+// --------------------
+// 🧭 COMPONENT
+// --------------------
 export default function ExportPage() {
   const navigation = useNavigation();
   const submit = useSubmit();
@@ -68,7 +81,6 @@ export default function ExportPage() {
     formData.append("status", status);
     if (startDate) formData.append("startDate", startDate);
     if (endDate) formData.append("endDate", endDate);
-
     submit(formData, { method: "post" });
   }, [status, startDate, endDate, submit]);
 
@@ -149,7 +161,7 @@ export default function ExportPage() {
               </Text>
               <BlockStack gap="300">
                 <Text as="p" variant="bodySm">
-                  The CSV file will include the following information:
+                  The CSV file will include:
                 </Text>
                 <BlockStack gap="100">
                   <Text as="p" variant="bodySm" tone="subdued">
