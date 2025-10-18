@@ -7,15 +7,14 @@ import { boundary } from "@shopify/shopify-app-remix/server";
 export const loader = async () => {
   return json({
     apiKey: process.env.SHOPIFY_API_KEY || "",
-    polarisTranslations: require("@shopify/polaris/locales/en.json"),
   });
 };
 
 export default function App() {
-  const { apiKey, polarisTranslations } = useLoaderData<typeof loader>();
+  const { apiKey } = useLoaderData<typeof loader>();
 
   return (
-    <AppProvider isEmbeddedApp apiKey={apiKey} i18n={polarisTranslations}>
+    <AppProvider isEmbeddedApp apiKey={apiKey}>
       <Outlet />
     </AppProvider>
   );
