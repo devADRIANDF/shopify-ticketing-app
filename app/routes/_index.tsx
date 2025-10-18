@@ -1,7 +1,5 @@
-import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
-import { authenticate } from "~/shopify.server";
+import { redirect } from "@remix-run/node";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+export const loader = async () => {
   return redirect("/app");
 };

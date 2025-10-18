@@ -15,9 +15,6 @@ redirect_urls = [
   "https://shopify-ticketing-app.onrender.com/api/auth/callback"
 ]
 
-[auth.token_exchange]
-enabled = true
-
 [webhooks]
 api_version = "2024-01"
 
