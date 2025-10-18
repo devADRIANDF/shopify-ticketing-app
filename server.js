@@ -16,6 +16,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve static files from build/client
+app.use(
+  "/build",
+  express.static(join(__dirname, "build", "client"), {
+    immutable: true,
+    maxAge: "1y",
+  })
+);
+
+// Serve public files
+app.use(express.static(join(__dirname, "public"), { maxAge: "1h" }));
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
