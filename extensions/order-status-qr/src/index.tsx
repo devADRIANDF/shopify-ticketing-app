@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   reactExtension,
   useApi,
+  useMetafield,
   BlockStack,
   Heading,
   Image,
@@ -13,68 +14,38 @@ import {
 export default reactExtension("purchase.thank-you.block.render", () => <Extension />);
 
 function Extension() {
-  const { shop, orderConfirmation } = useApi();
+  const { orderConfirmation } = useApi();
+  const ticketsMetafield = useMetafield({
+    namespace: "validiam",
+    key: "tickets",
+  });
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchTickets(retryCount = 0) {
+    console.log("[QR Extension] Order confirmation:", orderConfirmation);
+    console.log("[QR Extension] Tickets metafield:", ticketsMetafield);
+
+    if (ticketsMetafield?.value) {
       try {
-        // Get order ID from orderConfirmation API
-        const order = orderConfirmation?.current?.order;
-        console.log("[QR Extension] Order confirmation:", orderConfirmation);
-        console.log("[QR Extension] Order object:", order);
+        const ticketsData = JSON.parse(ticketsMetafield.value);
+        console.log("[QR Extension] Parsed tickets data:", ticketsData);
 
-        if (!order?.id) {
-          console.log("[QR Extension] No order ID found");
-          setLoading(false);
-          return;
-        }
-
-        // Extract numeric ID from GraphQL ID (e.g., "gid://shopify/Order/123" -> "123")
-        const orderId = order.id.split("/").pop();
-        console.log("[QR Extension] Fetching tickets for order:", orderId, "shop:", shop.myshopifyDomain);
-
-        // Fetch tickets from our app
-        const appUrl = "https://shopify-ticketing-app.onrender.com";
-        const url = `${appUrl}/api/tickets/by-order?orderId=${orderId}&shop=${shop.myshopifyDomain}`;
-        console.log("[QR Extension] Fetching from:", url);
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          console.error("[QR Extension] Response not OK:", response.status, response.statusText);
-          throw new Error(`Failed to load tickets: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("[QR Extension] Received data:", data);
-
-        if (data.tickets && data.tickets.length > 0) {
-          setTickets(data.tickets);
-        } else if (retryCount < 3) {
-          // Retry after 2 seconds if no tickets found (webhook might still be processing)
-          console.log("[QR Extension] No tickets found, retrying in 2s... (attempt", retryCount + 1, "/3)");
-          setTimeout(() => fetchTickets(retryCount + 1), 2000);
-          return;
-        } else {
-          console.log("[QR Extension] No tickets found after 3 retries");
+        if (Array.isArray(ticketsData) && ticketsData.length > 0) {
+          setTickets(ticketsData);
         }
       } catch (err) {
-        console.error("[QR Extension] Error fetching tickets:", err);
-        setError("Unable to load tickets");
-      } finally {
-        setLoading(false);
+        console.error("[QR Extension] Error parsing tickets metafield:", err);
       }
+    } else {
+      console.log("[QR Extension] No tickets metafield found");
     }
 
-    fetchTickets();
-  }, [orderConfirmation, shop]);
+    setLoading(false);
+  }, [ticketsMetafield, orderConfirmation]);
 
   // Don't render anything if no tickets
   if (loading) return null;
-  if (error) return null;
   if (tickets.length === 0) return null;
 
   return (

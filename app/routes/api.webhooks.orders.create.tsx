@@ -10,7 +10,7 @@ import { prisma } from "~/lib/db.server";
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     console.log(`[Webhook] Incoming orders/create webhook request`);
-    const { shop, payload } = await authenticate.webhook(request);
+    const { shop, payload, admin } = await authenticate.webhook(request);
 
     console.log(`[Webhook] Orders/Create received for shop: ${shop}`);
     console.log(`[Webhook] Order details:`, {
@@ -122,6 +122,62 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         allTickets.push(...result.tickets);
       } else {
         console.error(`[Webhook] Failed to create tickets: ${result.error}`);
+      }
+    }
+
+    // Save tickets to order metafields so the thank you page extension can display them
+    if (allTickets.length > 0) {
+      console.log(`[Webhook] Saving ${allTickets.length} tickets to order metafields`);
+
+      try {
+        const ticketsData = allTickets.map(ticket => ({
+          id: ticket.id,
+          productTitle: ticket.productTitle,
+          shopifyOrderName: ticket.shopifyOrderName,
+          qrCodeDataUrl: ticket.qrCode,
+          status: ticket.status,
+        }));
+
+        // Save to order metafield
+        const metafieldMutation = `
+          mutation UpdateOrderMetafield($input: OrderInput!) {
+            orderUpdate(input: $input) {
+              order {
+                id
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `;
+
+        const response = await admin.graphql(metafieldMutation, {
+          variables: {
+            input: {
+              id: `gid://shopify/Order/${orderId}`,
+              metafields: [
+                {
+                  namespace: "validiam",
+                  key: "tickets",
+                  type: "json",
+                  value: JSON.stringify(ticketsData),
+                },
+              ],
+            },
+          },
+        });
+
+        const result = await response.json();
+
+        if (result.data?.orderUpdate?.userErrors?.length > 0) {
+          console.error("[Webhook] Error saving metafield:", result.data.orderUpdate.userErrors);
+        } else {
+          console.log("[Webhook] Tickets saved to order metafields successfully");
+        }
+      } catch (error) {
+        console.error("[Webhook] Error saving tickets to metafields:", error);
       }
     }
 
