@@ -2,7 +2,7 @@ import { createRequestHandler } from "@remix-run/express";
 import express from "express";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,6 +32,16 @@ if (!existsSync(buildPath)) {
   console.error("ERROR: Build file not found at", buildPath);
   console.error("Please check your build process");
   process.exit(1);
+}
+
+// Read and show first 500 chars of build file
+try {
+  const buildContent = readFileSync(buildPath, "utf-8");
+  console.log("=== First 500 characters of build/index.js ===");
+  console.log(buildContent.substring(0, 500));
+  console.log("=== End of preview ===");
+} catch (error) {
+  console.error("ERROR reading build file:", error);
 }
 
 // Load Remix build
