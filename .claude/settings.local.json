@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(npm install @remix-run/vercel@^2.5.1)",
+      "Bash(git add api/index.js vercel.json vite.config.ts VERCEL_DEPLOYMENT.md)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Improve Vercel serverless handler for Remix\n\n- Updated api/index.js to properly convert Vercel req/res to Fetch API\n- Improved error handling with detailed logging\n- Updated vercel.json buildCommand to use prisma generate instead of full setup\n- Added NODE_ENV environment variable configuration\n- Updated vite.config.ts with serverBuildFile and SSR externals\n- Added VERCEL_DEPLOYMENT.md with complete deployment instructions\n\nThis should fix the 500 FUNCTION_INVOCATION_FAILED error in Vercel.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push origin master)"
     ],
     "deny": [],
     "ask": []
