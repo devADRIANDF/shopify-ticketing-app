@@ -19,32 +19,49 @@ function Extension() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchTickets() {
+    async function fetchTickets(retryCount = 0) {
       try {
         // Get order ID from checkout
         const order = extension.target.order;
+        console.log("[QR Extension] Order object:", order);
+
         if (!order?.id) {
+          console.log("[QR Extension] No order ID found");
           setLoading(false);
           return;
         }
 
         // Extract numeric ID from GraphQL ID (e.g., "gid://shopify/Order/123" -> "123")
         const orderId = order.id.split("/").pop();
+        console.log("[QR Extension] Fetching tickets for order:", orderId, "shop:", shop.myshopifyDomain);
 
         // Fetch tickets from our app
         const appUrl = "https://shopify-ticketing-app.onrender.com";
-        const response = await fetch(
-          `${appUrl}/api/tickets/by-order?orderId=${orderId}&shop=${shop.myshopifyDomain}`
-        );
+        const url = `${appUrl}/api/tickets/by-order?orderId=${orderId}&shop=${shop.myshopifyDomain}`;
+        console.log("[QR Extension] Fetching from:", url);
+
+        const response = await fetch(url);
 
         if (!response.ok) {
-          throw new Error("Failed to load tickets");
+          console.error("[QR Extension] Response not OK:", response.status, response.statusText);
+          throw new Error(`Failed to load tickets: ${response.status}`);
         }
 
         const data = await response.json();
-        setTickets(data.tickets || []);
+        console.log("[QR Extension] Received data:", data);
+
+        if (data.tickets && data.tickets.length > 0) {
+          setTickets(data.tickets);
+        } else if (retryCount < 3) {
+          // Retry after 2 seconds if no tickets found (webhook might still be processing)
+          console.log("[QR Extension] No tickets found, retrying in 2s... (attempt", retryCount + 1, "/3)");
+          setTimeout(() => fetchTickets(retryCount + 1), 2000);
+          return;
+        } else {
+          console.log("[QR Extension] No tickets found after 3 retries");
+        }
       } catch (err) {
-        console.error("Error fetching tickets:", err);
+        console.error("[QR Extension] Error fetching tickets:", err);
         setError("Unable to load tickets");
       } finally {
         setLoading(false);
