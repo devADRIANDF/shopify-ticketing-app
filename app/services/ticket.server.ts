@@ -30,6 +30,20 @@ export async function createTicketsForLineItem(
   const tickets = [];
 
   try {
+    // Check if tickets already exist for this line item (prevent duplicates)
+    const existingTickets = await prisma.ticket.findMany({
+      where: {
+        shopifyOrderId: options.shopifyOrderId,
+        lineItemId: options.lineItemId,
+        shop: options.shop,
+      },
+    });
+
+    if (existingTickets.length > 0) {
+      console.log(`[Ticket Service] Tickets already exist for line item ${options.lineItemId}, skipping creation`);
+      return { success: true, tickets: existingTickets };
+    }
+
     // Generate tickets based on quantity
     for (let i = 0; i < options.quantity; i++) {
       const ticketId = generateTicketId();
