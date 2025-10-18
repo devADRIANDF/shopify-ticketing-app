@@ -20,7 +20,7 @@ api_version = "2024-01"
 
 [[webhooks.subscriptions]]
 topics = [ "orders/create" ]
-uri = "/api/webhooks/orders/create"
+uri = "https://shopify-ticketing-app.onrender.com/api/webhooks/orders/create"
 
 [pos]
 embedded = false
