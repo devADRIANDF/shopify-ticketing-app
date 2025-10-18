@@ -18,10 +18,22 @@ import { authenticate } from "~/shopify.server";
 import { prisma } from "~/lib/db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const url = new URL(request.url);
+  const shop = url.searchParams.get("shop") || "";
+
+  if (!shop) {
+    return json({
+      settings: {
+        ticketTag: "ticket",
+        autoEmailEnabled: true,
+        brandColor: "#5C6AC4",
+        brandLogo: "",
+      },
+    });
+  }
 
   const settings = await prisma.appSettings.findUnique({
-    where: { shop: session.shop },
+    where: { shop },
   });
 
   return json({
@@ -35,16 +47,20 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
   const formData = await request.formData();
 
+  const shop = formData.get("shop") as string;
   const ticketTag = formData.get("ticketTag") as string;
   const autoEmailEnabled = formData.get("autoEmailEnabled") === "true";
   const brandColor = formData.get("brandColor") as string;
   const brandLogo = formData.get("brandLogo") as string;
 
+  if (!shop) {
+    return json({ success: false, error: "Missing shop parameter" }, { status: 400 });
+  }
+
   await prisma.appSettings.upsert({
-    where: { shop: session.shop },
+    where: { shop },
     update: {
       ticketTag,
       autoEmailEnabled,
@@ -52,7 +68,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       brandLogo,
     },
     create: {
-      shop: session.shop,
+      shop,
       ticketTag,
       autoEmailEnabled,
       brandColor,
@@ -84,7 +100,11 @@ export default function SettingsPage() {
   }, [navigation.state, navigation.formData]);
 
   const handleSave = useCallback(() => {
+    const url = new URL(window.location.href);
+    const shop = url.searchParams.get("shop") || "";
+
     const formData = new FormData();
+    formData.append("shop", shop);
     formData.append("ticketTag", ticketTag);
     formData.append("autoEmailEnabled", autoEmailEnabled.toString());
     formData.append("brandColor", brandColor);

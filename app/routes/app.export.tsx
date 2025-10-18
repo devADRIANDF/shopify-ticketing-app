@@ -23,20 +23,25 @@ import type { TicketStatus } from "@prisma/client";
 // 📦 LOADER
 // --------------------
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
-  return json({ shop: session.shop });
+  const url = new URL(request.url);
+  const shop = url.searchParams.get("shop") || "";
+  return json({ shop });
 };
 
 // --------------------
 // ⚙️ ACTION
 // --------------------
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
   const formData = await request.formData();
 
+  const shop = formData.get("shop") as string;
   const status = formData.get("status") as string | null;
   const startDateStr = formData.get("startDate") as string | null;
   const endDateStr = formData.get("endDate") as string | null;
+
+  if (!shop) {
+    return json({ error: "Missing shop parameter" }, { status: 400 });
+  }
 
   const filters: Record<string, any> = {};
 
@@ -53,7 +58,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     filters.endDate = new Date(endDateStr);
   }
 
-  const csvData = await exportTicketsToCSV(session.shop, filters);
+  const csvData = await exportTicketsToCSV(shop, filters);
 
   return new Response(csvData, {
     headers: {
@@ -77,7 +82,11 @@ export default function ExportPage() {
   const isExporting = navigation.state === "submitting";
 
   const handleExport = useCallback(() => {
+    const url = new URL(window.location.href);
+    const shop = url.searchParams.get("shop") || "";
+
     const formData = new FormData();
+    formData.append("shop", shop);
     formData.append("status", status);
     if (startDate) formData.append("startDate", startDate);
     if (endDate) formData.append("endDate", endDate);

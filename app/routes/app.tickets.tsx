@@ -20,15 +20,25 @@ import { TicketCard } from "~/components/TicketCard";
 import type { TicketStatus } from "@prisma/client";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
   const url = new URL(request.url);
+  const shop = url.searchParams.get("shop") || "";
+
+  if (!shop) {
+    return json({
+      tickets: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      currentStatus: "all",
+    });
+  }
 
   const page = parseInt(url.searchParams.get("page") || "1");
   const status = url.searchParams.get("status") as TicketStatus | undefined;
   const limit = 20;
   const offset = (page - 1) * limit;
 
-  const { tickets, total } = await getTicketsByShop(session.shop, {
+  const { tickets, total } = await getTicketsByShop(shop, {
     status: status || undefined,
     limit,
     offset,
