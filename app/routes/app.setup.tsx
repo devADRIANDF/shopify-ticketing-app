@@ -40,15 +40,29 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       settingsExist: !!settings,
       settings,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Setup loader error:", error);
+
+    // Extract meaningful error message
+    let errorMessage = "Unknown error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    } else if (error?.toString && error.toString() !== "[object Object]") {
+      errorMessage = error.toString();
+    }
+
     return json({
       shop: "",
       webhookRegistered: false,
       webhookDetails: null,
       settingsExist: false,
       settings: null,
-      error: String(error),
+      error: errorMessage,
     });
   }
 };
@@ -90,9 +104,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     return json({ success: false, message: "Unknown action" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Setup action error:", error);
-    return json({ success: false, error: String(error) }, { status: 500 });
+
+    // Extract meaningful error message
+    let errorMessage = "Unknown error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (error?.message) {
+      errorMessage = error.message;
+    } else if (typeof error === "string") {
+      errorMessage = error;
+    } else if (error?.toString && error.toString() !== "[object Object]") {
+      errorMessage = error.toString();
+    }
+
+    return json({
+      success: false,
+      error: errorMessage,
+      details: process.env.NODE_ENV === "development" ? String(error) : undefined
+    }, { status: 500 });
   }
 };
 
