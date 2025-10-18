@@ -178,6 +178,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         }
       } catch (error) {
         console.error("[Webhook] Error saving tickets to metafields:", error);
+        // Try to parse error details if it's a Response object
+        if (error instanceof Response) {
+          try {
+            const errorBody = await error.json();
+            console.error("[Webhook] Error details:", JSON.stringify(errorBody, null, 2));
+          } catch (e) {
+            console.error("[Webhook] Could not parse error response");
+          }
+        }
       }
     }
 
