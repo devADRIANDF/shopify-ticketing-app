@@ -2,13 +2,21 @@
 
 ## Cambios Realizados
 
-Se ha corregido la configuración del proyecto para usar **Remix** correctamente en Vercel (antes estaba mezclado con Next.js).
+Se ha corregido la configuración del proyecto para usar **Remix con Node.js server** en Vercel.
+
+### Problema Original:
+- Error: `Cannot find module '/var/task/build/index.js'`
+- Las serverless functions no tenían acceso al build directory
+
+### Solución Implementada:
+- Cambio de **serverless functions** a **Node.js server** persistente
+- Mejor compatibilidad con Remix en Vercel
 
 ### Archivos modificados:
-1. **package.json** - Scripts actualizados para Remix
-2. **vercel.json** - Configuración de deployment
-3. **api/index.js** - Handler serverless para Remix
-4. **vite.config.ts** - Configuración de build
+1. **package.json** - Agregado Express, actualizado start script
+2. **server.js** - Servidor Express para Remix (NUEVO)
+3. **vercel.json** - Configuración para Node.js server
+4. **vite.config.ts** - Configuración de build optimizada
 5. **shopify.app.toml** - URLs actualizadas
 
 ## Pasos para Deployar

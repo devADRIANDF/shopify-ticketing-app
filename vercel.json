@@ -1,6 +1,15 @@
 {
-  "buildCommand": "prisma generate && remix build",
-  "installCommand": "npm install",
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
   "routes": [
     {
       "src": "/build/(.*)",
@@ -8,10 +17,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/server.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
