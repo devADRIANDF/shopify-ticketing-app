@@ -20,25 +20,43 @@ import { TicketCard } from "~/components/TicketCard";
 import { TicketIcon, QRIcon } from "~/components/Icons";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  // Get shop from URL params (passed by Shopify in embedded context)
+  const url = new URL(request.url);
+  const shop = url.searchParams.get("shop") || url.searchParams.get("embedded") || "";
 
-  const { tickets, total } = await getTicketsByShop(session.shop, {
-    limit: 20,
-  });
+  if (!shop) {
+    return json({
+      tickets: [],
+      stats: { total: 0, valid: 0, scanned: 0, pending: 0 },
+      shop: "",
+    });
+  }
 
-  // Calculate stats
-  const stats = {
-    total,
-    valid: tickets.filter((t) => t.status === "VALID").length,
-    scanned: tickets.filter((t) => t.status === "SCANNED").length,
-    pending: tickets.filter((t) => t.status === "PENDING").length,
-  };
+  try {
+    const { tickets, total } = await getTicketsByShop(shop, {
+      limit: 20,
+    });
 
-  return json({
-    tickets,
-    stats,
-    shop: session.shop,
-  });
+    // Calculate stats
+    const stats = {
+      total,
+      valid: tickets.filter((t) => t.status === "VALID").length,
+      scanned: tickets.filter((t) => t.status === "SCANNED").length,
+      pending: tickets.filter((t) => t.status === "PENDING").length,
+    };
+
+    return json({
+      tickets,
+      stats,
+      shop,
+    });
+  } catch (error) {
+    return json({
+      tickets: [],
+      stats: { total: 0, valid: 0, scanned: 0, pending: 0 },
+      shop,
+    });
+  }
 };
 
 export default function Index() {
