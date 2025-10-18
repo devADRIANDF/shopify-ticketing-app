@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   reactExtension,
   useApi,
+  useOrder,
   BlockStack,
   Heading,
   Image,
@@ -13,7 +14,8 @@ import {
 export default reactExtension("purchase.thank-you.block.render", () => <Extension />);
 
 function Extension() {
-  const { extension, shop } = useApi();
+  const { shop } = useApi();
+  const order = useOrder();
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,8 +23,7 @@ function Extension() {
   useEffect(() => {
     async function fetchTickets(retryCount = 0) {
       try {
-        // Get order ID from checkout
-        const order = extension.target.order;
+        // Get order ID from useOrder hook
         console.log("[QR Extension] Order object:", order);
 
         if (!order?.id) {
@@ -69,7 +70,7 @@ function Extension() {
     }
 
     fetchTickets();
-  }, [extension, shop]);
+  }, [order, shop]);
 
   // Don't render anything if no tickets
   if (loading) return null;
