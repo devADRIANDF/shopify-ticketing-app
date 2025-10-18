@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run setup && remix build",
+  "buildCommand": "prisma generate && remix build",
   "installCommand": "npm install",
   "routes": [
     {
@@ -10,5 +10,8 @@
       "src": "/(.*)",
       "dest": "/api/index.js"
     }
-  ]
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
