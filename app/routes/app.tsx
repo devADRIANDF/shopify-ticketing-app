@@ -2,9 +2,13 @@ import { json } from "@remix-run/node";
 import { Outlet, useLoaderData, useRouteError } from "@remix-run/react";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
-import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 
-export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
+export const links = () => [
+  {
+    rel: "stylesheet",
+    href: "https://cdn.shopify.com/static/polaris/12.0.0/polaris.min.css",
+  },
+];
 
 export const loader = async () => {
   return json({
