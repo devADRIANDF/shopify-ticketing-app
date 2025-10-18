@@ -40,6 +40,19 @@ try {
   console.log("=== First 500 characters of build/index.js ===");
   console.log(buildContent.substring(0, 500));
   console.log("=== End of preview ===");
+
+  // Find the first occurrence of '<' and show context
+  const firstLessThan = buildContent.indexOf('<');
+  if (firstLessThan !== -1) {
+    console.log("\n=== Found '<' at position", firstLessThan, "===");
+    const start = Math.max(0, firstLessThan - 200);
+    const end = Math.min(buildContent.length, firstLessThan + 200);
+    console.log("Context around it:");
+    console.log(buildContent.substring(start, end));
+    console.log("=== End of context ===");
+  } else {
+    console.log("\n=== No '<' found in file! ===");
+  }
 } catch (error) {
   console.error("ERROR reading build file:", error);
 }
