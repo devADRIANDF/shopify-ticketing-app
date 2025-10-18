@@ -7,7 +7,7 @@
     "dev": "remix dev",
     "build": "remix build",
     "start": "node server.js",
-    "deploy": "shopify app deploy",
+    "deploy": "npx shopify app deploy --force",
     "setup": "prisma generate && prisma migrate deploy",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
