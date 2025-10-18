@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "remix dev",
     "build": "remix build",
-    "start": "remix-serve ./build/index.js",
+    "start": "node server.js",
     "deploy": "shopify app deploy",
     "setup": "prisma generate && prisma migrate deploy",
     "prisma:generate": "prisma generate",
