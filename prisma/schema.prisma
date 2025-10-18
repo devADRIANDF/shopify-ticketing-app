@@ -39,7 +39,7 @@ model Ticket {
   buyerEmail    String
   buyerName     String?
   ticketType    String
-  qrCode        String   @unique
+  qrCode        String   // QR code data URL (base64 image)
   qrData        String   // Encrypted JSON data
   status        TicketStatus @default(PENDING)
   scannedAt     DateTime?
@@ -52,7 +52,6 @@ model Ticket {
 
   @@index([shop])
   @@index([shopifyOrderId])
-  @@index([qrCode])
   @@index([status])
   @@index([buyerEmail])
 }
