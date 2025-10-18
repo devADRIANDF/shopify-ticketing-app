@@ -12,7 +12,10 @@
       "Bash(npx shopify app config --help)",
       "Bash(npx shopify app deploy)",
       "Bash(npx shopify app deploy --force)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Add metafield setup and debugging endpoints\n\n- Added metafield definition creation in setup page\n- Created debug endpoint to check order metafields\n- Added webhook status endpoint\n- Updated setup UI with metafield configuration button\n\nThis fixes the issue where QR codes don''t show on thank you page\nbecause the metafield definition wasn''t registered in Shopify.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push origin master)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Authentication issues in setup page\n\n- Added proper authentication in loader using authenticate.admin\n- Improved error handling for Response objects\n- Fixed metafield setup to use existing session\n- Added detailed logging for debugging\n\nThis fixes the \"[object Response]\" error when setting up metafields.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

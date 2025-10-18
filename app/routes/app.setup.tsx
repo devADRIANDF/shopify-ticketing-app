@@ -16,30 +16,19 @@ import { prisma } from "~/lib/db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
-    const url = new URL(request.url);
-    const shop = url.searchParams.get("shop") || "";
-
-    if (!shop) {
-      return json({
-        shop: "",
-        webhookRegistered: false,
-        webhookDetails: null,
-        settingsExist: false,
-        settings: null,
-        error: "Shop parameter is missing. Please open the app from Shopify Admin.",
-      });
-    }
+    // Authenticate first to establish session
+    const { session } = await authenticate.admin(request);
+    const shop = session.shop;
 
     // Check if settings exist
     const settings = await prisma.appSettings.findUnique({
       where: { shop },
     });
 
-    // Note: We can't check webhook status without OAuth authentication
     // The webhook is automatically registered via shopify.app.toml
     return json({
       shop,
-      webhookRegistered: true, // Assume registered via shopify.app.toml
+      webhookRegistered: true,
       webhookDetails: {
         address: `${process.env.SHOPIFY_APP_URL}/api/webhooks/orders/create`,
         topic: "orders/create",
@@ -76,17 +65,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
+    // Authenticate to get session
+    const { session, admin } = await authenticate.admin(request);
+    const shop = session.shop;
+
     const formData = await request.formData();
     const action = formData.get("action");
-    const url = new URL(request.url);
-    const shop = url.searchParams.get("shop") || "";
-
-    if (!shop) {
-      return json({
-        success: false,
-        error: "Shop parameter is missing"
-      }, { status: 400 });
-    }
 
     if (action === "createSettings") {
       // Create default settings
@@ -105,49 +89,88 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     if (action === "setupMetafields") {
-      const { admin } = await authenticate.admin(request);
-
-      // Create metafield definition for order tickets
-      const mutation = `
-        mutation CreateMetafieldDefinition {
-          metafieldDefinitionCreate(
-            definition: {
-              name: "Tickets"
-              namespace: "validiam"
-              key: "tickets"
-              description: "QR code tickets data for order"
-              type: "json"
-              ownerType: ORDER
-            }
-          ) {
-            createdDefinition {
-              id
-              name
-            }
-            userErrors {
-              field
-              message
+      try {
+        // Create metafield definition for order tickets
+        const mutation = `
+          mutation CreateMetafieldDefinition {
+            metafieldDefinitionCreate(
+              definition: {
+                name: "Tickets"
+                namespace: "validiam"
+                key: "tickets"
+                description: "QR code tickets data for order"
+                type: "json"
+                ownerType: ORDER
+              }
+            ) {
+              createdDefinition {
+                id
+                name
+              }
+              userErrors {
+                field
+                message
+              }
             }
           }
-        }
-      `;
+        `;
 
-      const response = await admin.graphql(mutation);
-      const result = await response.json();
+        console.log("[Setup] Creating metafield definition...");
+        const response = await admin.graphql(mutation);
 
-      if (result.data?.metafieldDefinitionCreate?.userErrors?.length > 0) {
-        const errors = result.data.metafieldDefinitionCreate.userErrors;
-        // If it already exists, that's okay
-        if (errors[0].message?.includes("taken") || errors[0].message?.includes("already exists")) {
-          return json({ success: true, message: "Metafield definition already exists" });
+        // Check if response is ok
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("[Setup] GraphQL request failed:", response.status, errorText);
+          return json({
+            success: false,
+            error: `GraphQL request failed: ${response.status} - ${errorText}`
+          });
         }
+
+        const result = await response.json();
+        console.log("[Setup] GraphQL response:", JSON.stringify(result, null, 2));
+
+        if (result.data?.metafieldDefinitionCreate?.userErrors?.length > 0) {
+          const errors = result.data.metafieldDefinitionCreate.userErrors;
+          console.log("[Setup] User errors:", errors);
+
+          // If it already exists, that's okay
+          if (errors[0].message?.includes("taken") || errors[0].message?.includes("already exists")) {
+            return json({ success: true, message: "Metafield definition already exists" });
+          }
+          return json({
+            success: false,
+            error: errors.map((e: any) => e.message).join(", ")
+          });
+        }
+
+        console.log("[Setup] Metafield definition created successfully");
+        return json({ success: true, message: "Metafield definition created successfully" });
+      } catch (setupError: any) {
+        console.error("[Setup] Error in setupMetafields:", setupError);
+
+        // Handle Response objects specifically
+        if (setupError instanceof Response) {
+          try {
+            const errorBody = await setupError.text();
+            return json({
+              success: false,
+              error: `Authentication or API error: ${setupError.status} - ${errorBody}`
+            });
+          } catch {
+            return json({
+              success: false,
+              error: `Authentication or API error: ${setupError.status}`
+            });
+          }
+        }
+
         return json({
           success: false,
-          error: errors.map((e: any) => e.message).join(", ")
+          error: setupError.message || "Failed to setup metafields"
         });
       }
-
-      return json({ success: true, message: "Metafield definition created successfully" });
     }
 
     return json({ success: false, message: "Unknown action" });
