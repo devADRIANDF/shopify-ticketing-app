@@ -6,7 +6,7 @@ import { boundary } from "@shopify/shopify-app-remix/server";
 export const links = () => [
   {
     rel: "stylesheet",
-    href: "https://cdn.shopify.com/static/polaris/12.0.0/polaris.min.css",
+    href: "/polaris/styles.css",
   },
 ];
 
