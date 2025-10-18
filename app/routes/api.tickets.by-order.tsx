@@ -36,7 +36,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           id: ticket.id,
           productTitle: ticket.productTitle,
           shopifyOrderName: ticket.shopifyOrderName,
-          qrCodeDataUrl: ticket.qrCodeDataUrl,
+          qrCodeDataUrl: ticket.qrCode, // qrCode field contains the base64 data URL
           status: ticket.status,
         })),
       },
