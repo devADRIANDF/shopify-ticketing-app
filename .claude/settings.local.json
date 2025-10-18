@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git add -A)"
+      "Bash(cat prisma/migrations/20251018033509_init/migration.sql)"
     ],
     "deny": [],
     "ask": []
