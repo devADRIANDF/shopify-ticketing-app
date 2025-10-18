@@ -5,13 +5,15 @@ export default defineConfig({
   plugins: [
     remix({
       ignoredRouteFiles: ["**/.*"],
-      serverBuildFile: "index.js",
     }),
   ],
   server: {
     port: 3000,
   },
   ssr: {
-    noExternal: ["@shopify/polaris"],
+    noExternal: ["@shopify/polaris", "@shopify/shopify-app-remix"],
+  },
+  build: {
+    target: "esnext",
   },
 });
