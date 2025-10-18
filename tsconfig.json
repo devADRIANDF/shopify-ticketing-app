@@ -1,8 +1,7 @@
 {
   "include": [
     "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
+    "**/*.tsx"
   ],
   "compilerOptions": {
     "lib": [
@@ -12,7 +11,7 @@
     ],
     "isolatedModules": true,
     "esModuleInterop": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -32,12 +31,7 @@
       "@remix-run/node",
       "vite/client"
     ],
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "incremental": true
   },
   "exclude": [
     "node_modules"
