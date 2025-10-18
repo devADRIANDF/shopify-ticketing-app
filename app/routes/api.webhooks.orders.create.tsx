@@ -9,9 +9,16 @@ import { prisma } from "~/lib/db.server";
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
+    console.log(`[Webhook] Incoming orders/create webhook request`);
     const { shop, payload } = await authenticate.webhook(request);
 
     console.log(`[Webhook] Orders/Create received for shop: ${shop}`);
+    console.log(`[Webhook] Order details:`, {
+      id: (payload as any).id,
+      name: (payload as any).name,
+      email: (payload as any).email,
+      line_items_count: (payload as any).line_items?.length || 0
+    });
 
     // Get app settings to check ticket tag
     const settings = await prisma.appSettings.findUnique({
@@ -44,16 +51,33 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const allTickets = [];
 
     for (const lineItem of line_items) {
+      console.log(`[Webhook] Processing line item:`, {
+        id: lineItem.id,
+        title: lineItem.title,
+        product_id: lineItem.product_id,
+        tags: lineItem.tags || 'no tags field'
+      });
+
       // Check if product has ticket tag
-      const productTags = lineItem.properties?.find(
-        (prop: any) => prop.name === "_tags"
-      )?.value || "";
+      const productTags = lineItem.tags || "";
+
+      const titleLower = lineItem.title.toLowerCase();
+      const tagsLower = productTags.toLowerCase();
+      const ticketTagLower = ticketTag.toLowerCase();
 
       const isTicket =
-        productTags.toLowerCase().includes(ticketTag.toLowerCase()) ||
-        lineItem.title.toLowerCase().includes(ticketTag.toLowerCase()) ||
-        lineItem.title.toLowerCase().includes("entrada") ||
-        lineItem.title.toLowerCase().includes("entry");
+        tagsLower.includes(ticketTagLower) ||
+        titleLower.includes(ticketTagLower) ||
+        titleLower.includes("entrada") ||
+        titleLower.includes("entry");
+
+      console.log(`[Webhook] Ticket detection:`, {
+        productTags,
+        ticketTag,
+        titleContainsTicket: titleLower.includes(ticketTagLower),
+        tagsContainTicket: tagsLower.includes(ticketTagLower),
+        isTicket
+      });
 
       if (!isTicket) {
         console.log(`[Webhook] Line item ${lineItem.id} is not a ticket, skipping`);
