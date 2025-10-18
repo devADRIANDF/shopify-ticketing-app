@@ -1,5 +1,5 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useSubmit, useNavigation } from "@remix-run/react";
+import { useLoaderData, useSubmit, useNavigation, useActionData } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -10,7 +10,7 @@ import {
   Text,
   List,
 } from "@shopify/polaris";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { authenticate } from "~/shopify.server";
 import { prisma } from "~/lib/db.server";
 
@@ -98,9 +98,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function SetupPage() {
   const data = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Get shop from URL to preserve in navigation
   const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
@@ -108,20 +110,32 @@ export default function SetupPage() {
 
   const isLoading = navigation.state === "submitting";
 
+  // Handle action response
+  useEffect(() => {
+    if (actionData) {
+      if (actionData.success) {
+        setShowSuccess(true);
+        setErrorMessage("");
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        setErrorMessage(actionData.error || actionData.message || "Unknown error occurred");
+        setShowSuccess(false);
+      }
+    }
+  }, [actionData]);
+
   const handleRegisterWebhook = useCallback(() => {
+    setErrorMessage(""); // Clear any previous errors
     const formData = new FormData();
     formData.append("action", "registerWebhook");
     submit(formData, { method: "post" });
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
   }, [submit]);
 
   const handleCreateSettings = useCallback(() => {
+    setErrorMessage(""); // Clear any previous errors
     const formData = new FormData();
     formData.append("action", "createSettings");
     submit(formData, { method: "post" });
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
   }, [submit]);
 
   return (
@@ -139,9 +153,15 @@ export default function SetupPage() {
               </Banner>
             )}
 
+            {errorMessage && (
+              <Banner tone="critical" onDismiss={() => setErrorMessage("")}>
+                Error: {errorMessage}
+              </Banner>
+            )}
+
             {data.error && (
               <Banner tone="critical">
-                Error: {data.error}
+                Error loading setup page: {data.error}
               </Banner>
             )}
 

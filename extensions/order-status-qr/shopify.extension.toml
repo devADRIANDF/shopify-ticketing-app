@@ -1,0 +1,13 @@
+# Learn more: https://shopify.dev/docs/api/checkout-ui-extensions/configuration
+
+api_version = "2024-01"
+type = "ui_extension"
+name = "Order Status QR Codes"
+handle = "order-status-qr"
+
+[build]
+command = ""
+path = "src/index.tsx"
+
+[[extension_points]]
+target = "purchase.thank-you.block.render"

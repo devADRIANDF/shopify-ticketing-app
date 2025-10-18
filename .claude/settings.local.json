@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cat prisma/migrations/20251018033509_init/migration.sql)"
+      "Bash(cat prisma/migrations/20251018033509_init/migration.sql)",
+      "Bash(git add app/routes/app._index.tsx app/routes/app.settings.tsx app/routes/app.tickets.tsx app/routes/app.export.tsx app/routes/app.setup.tsx)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Preserve shop parameter across all navigation\n\nFixed navigation issues where clicking buttons (Settings, Tickets, \nExport, Setup & Webhooks) did nothing. Root cause was shop parameter\nnot being preserved when navigating between pages.\n\nChanges:\n1. app._index.tsx - Added navigateWithShop() helper function\n2. app.settings.tsx - Updated backAction to include shop parameter\n3. app.tickets.tsx - Updated backAction and primaryAction with shop\n4. app.export.tsx - Updated backAction with shop parameter\n5. app.setup.tsx - Updated backAction with shop parameter\n\nAll routes now properly preserve the shop parameter during navigation,\nenabling buttons and links to work correctly in the embedded app.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
