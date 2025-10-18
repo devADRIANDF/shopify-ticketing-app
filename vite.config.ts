@@ -13,8 +13,13 @@ export default defineConfig({
   },
   ssr: {
     noExternal: ["@shopify/polaris", "@shopify/shopify-app-remix"],
+    target: "node",
   },
   build: {
-    target: "esnext",
+    target: "node18",
+  },
+  esbuild: {
+    jsx: "automatic",
+    jsxDev: false,
   },
 });
