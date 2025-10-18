@@ -8,6 +8,9 @@ type = "ui_extension"
 name = "Order Status QR Codes"
 handle = "order-status-qr"
 
+[extensions.capabilities]
+network_access = true
+
 [[extensions.targeting]]
 target = "purchase.thank-you.block.render"
 module = "./src/index.tsx"
