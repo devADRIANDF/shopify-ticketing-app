@@ -156,7 +156,7 @@ export default function Index() {
                   <Text as="h2" variant="headingLg" fontWeight="semibold">
                     Recent Tickets
                   </Text>
-                  <Button onClick={() => navigate("/app/tickets")}>View All</Button>
+                  <Button onClick={() => navigateWithShop("/app/tickets")}>View All</Button>
                 </InlineStack>
 
                 {tickets.length === 0 ? (
