@@ -16,17 +16,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files from build/client
-app.use(
-  "/build",
-  express.static(join(__dirname, "build", "client"), {
-    immutable: true,
-    maxAge: "1y",
-  })
-);
-
-// Serve public files
-app.use(express.static(join(__dirname, "public"), { maxAge: "1h" }));
+// Serve public files (includes /build directory from Remix/Vite)
+app.use(express.static(join(__dirname, "public"), {
+  maxAge: "1h",
+  immutable: true
+}));
 
 // Health check
 app.get("/health", (req, res) => {
