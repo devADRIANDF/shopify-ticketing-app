@@ -4,7 +4,15 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nFix: Add write_orders scope to save metafields\n\nChanged from read_orders to write_orders scope to allow\nthe webhook to save ticket QR codes in order metafields.\n\nThis is required for the orderUpdate mutation to work.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(npx shopify app config push --force)",
       "Bash(git commit -m \"$(cat <<''EOF''\nDebug: Add detailed error logging for metafield save failures\n\nAdded parsing of Response error objects to see the exact error\nmessage from Shopify when metafield save fails with 401.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit -m \"$(cat <<''EOF''\nAdd endpoint to clear sessions and force token regeneration\n\nCreated /api/clear-sessions endpoint to delete all sessions,\nforcing Shopify to generate new tokens with updated scopes.\n\nThis fixes the 401 error when saving metafields - old tokens\ndon''t have write_orders scope even after reinstalling the app.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd endpoint to clear sessions and force token regeneration\n\nCreated /api/clear-sessions endpoint to delete all sessions,\nforcing Shopify to generate new tokens with updated scopes.\n\nThis fixes the 401 error when saving metafields - old tokens\ndon''t have write_orders scope even after reinstalling the app.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(curl -X POST https://shopify-ticketing-app.onrender.com/api/clear-sessions)",
+      "Bash(powershell -Command \"Invoke-WebRequest -Method POST -Uri ''https://shopify-ticketing-app.onrender.com/api/clear-sessions'' -UseBasicParsing | Select-Object -ExpandProperty Content\")",
+      "Bash(curl -s -o nul -w \"%{http_code}\" https://shopify-ticketing-app.onrender.com/app)",
+      "Bash(npx shopify app --help)",
+      "Bash(npx shopify app config --help)",
+      "Bash(npx shopify app deploy)",
+      "Bash(npx shopify app deploy --force)",
+      "Bash(git add -A)"
     ],
     "deny": [],
     "ask": []

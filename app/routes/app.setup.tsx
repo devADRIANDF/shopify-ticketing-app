@@ -104,6 +104,52 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ success: true, message: "Settings created successfully" });
     }
 
+    if (action === "setupMetafields") {
+      const { admin } = await authenticate.admin(request);
+
+      // Create metafield definition for order tickets
+      const mutation = `
+        mutation CreateMetafieldDefinition {
+          metafieldDefinitionCreate(
+            definition: {
+              name: "Tickets"
+              namespace: "validiam"
+              key: "tickets"
+              description: "QR code tickets data for order"
+              type: "json"
+              ownerType: ORDER
+            }
+          ) {
+            createdDefinition {
+              id
+              name
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+
+      const response = await admin.graphql(mutation);
+      const result = await response.json();
+
+      if (result.data?.metafieldDefinitionCreate?.userErrors?.length > 0) {
+        const errors = result.data.metafieldDefinitionCreate.userErrors;
+        // If it already exists, that's okay
+        if (errors[0].message?.includes("taken") || errors[0].message?.includes("already exists")) {
+          return json({ success: true, message: "Metafield definition already exists" });
+        }
+        return json({
+          success: false,
+          error: errors.map((e: any) => e.message).join(", ")
+        });
+      }
+
+      return json({ success: true, message: "Metafield definition created successfully" });
+    }
+
     return json({ success: false, message: "Unknown action" });
   } catch (error: any) {
     console.error("Setup action error:", error);
@@ -161,6 +207,13 @@ export default function SetupPage() {
     setErrorMessage(""); // Clear any previous errors
     const formData = new FormData();
     formData.append("action", "createSettings");
+    submit(formData, { method: "post" });
+  }, [submit]);
+
+  const handleSetupMetafields = useCallback(() => {
+    setErrorMessage(""); // Clear any previous errors
+    const formData = new FormData();
+    formData.append("action", "setupMetafields");
     submit(formData, { method: "post" });
   }, [submit]);
 
@@ -258,9 +311,34 @@ export default function SetupPage() {
             <Card>
               <BlockStack gap="400">
                 <Text as="h2" variant="headingMd" fontWeight="semibold">
+                  Metafield Configuration
+                </Text>
+                <Text as="p" variant="bodyMd">
+                  The app needs to register a custom metafield definition to store ticket QR codes on orders.
+                  Click the button below to set it up.
+                </Text>
+                <Button
+                  onClick={handleSetupMetafields}
+                  loading={isLoading}
+                  variant="primary"
+                >
+                  Setup Order Metafields
+                </Button>
+                <Banner tone="info">
+                  This only needs to be done once. If already configured, clicking will confirm it exists.
+                </Banner>
+              </BlockStack>
+            </Card>
+
+            <Card>
+              <BlockStack gap="400">
+                <Text as="h2" variant="headingMd" fontWeight="semibold">
                   Instructions
                 </Text>
                 <List type="number">
+                  <List.Item>
+                    Click "Setup Order Metafields" above (IMPORTANT!)
+                  </List.Item>
                   <List.Item>
                     Webhooks are registered automatically - no action needed!
                   </List.Item>
