@@ -10,3 +10,10 @@ startTransition(() => {
     </StrictMode>
   );
 });
+
+// Initialize Shopify App Bridge
+if (window.shopify) {
+  window.shopify.idToken().then(() => {
+    console.log("App Bridge initialized");
+  });
+}

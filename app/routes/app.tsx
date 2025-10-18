@@ -10,14 +10,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   return json({
     apiKey: process.env.SHOPIFY_API_KEY || "",
+    polarisTranslations: require("@shopify/polaris/locales/en.json"),
   });
 };
 
 export default function App() {
-  const { apiKey } = useLoaderData<typeof loader>();
+  const { apiKey, polarisTranslations } = useLoaderData<typeof loader>();
 
   return (
-    <AppProvider isEmbeddedApp apiKey={apiKey}>
+    <AppProvider isEmbeddedApp apiKey={apiKey} i18n={polarisTranslations}>
       <Outlet />
     </AppProvider>
   );
