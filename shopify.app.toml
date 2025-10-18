@@ -2,7 +2,7 @@
 
 name = "validiam"
 client_id = "cc4511f9341d22ee8d454f3d2c1200fe"
-application_url = "https://shopify-ticketing-app.vercel.app"
+application_url = "https://shopify-ticketing-app.onrender.com"
 embedded = true
 
 [access_scopes]
@@ -10,9 +10,9 @@ scopes = "write_products,read_orders,write_webhooks,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://shopify-ticketing-app.vercel.app/auth/callback",
-  "https://shopify-ticketing-app.vercel.app/auth/shopify/callback",
-  "https://shopify-ticketing-app.vercel.app/api/auth/callback"
+  "https://shopify-ticketing-app.onrender.com/auth/callback",
+  "https://shopify-ticketing-app.onrender.com/auth/shopify/callback",
+  "https://shopify-ticketing-app.onrender.com/api/auth/callback"
 ]
 
 [webhooks]
