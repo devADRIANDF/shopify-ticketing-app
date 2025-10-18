@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   reactExtension,
   useApi,
-  useOrder,
   BlockStack,
   Heading,
   Image,
@@ -14,8 +13,7 @@ import {
 export default reactExtension("purchase.thank-you.block.render", () => <Extension />);
 
 function Extension() {
-  const { shop } = useApi();
-  const order = useOrder();
+  const { shop, orderConfirmation } = useApi();
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -23,7 +21,9 @@ function Extension() {
   useEffect(() => {
     async function fetchTickets(retryCount = 0) {
       try {
-        // Get order ID from useOrder hook
+        // Get order ID from orderConfirmation API
+        const order = orderConfirmation?.current?.order;
+        console.log("[QR Extension] Order confirmation:", orderConfirmation);
         console.log("[QR Extension] Order object:", order);
 
         if (!order?.id) {
@@ -70,7 +70,7 @@ function Extension() {
     }
 
     fetchTickets();
-  }, [order, shop]);
+  }, [orderConfirmation, shop]);
 
   // Don't render anything if no tickets
   if (loading) return null;
