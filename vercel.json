@@ -1,13 +1,13 @@
 {
   "version": 2,
+  "buildCommand": "prisma generate && remix build",
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["build/**", "public/**"]
+      }
     }
   ],
   "routes": [

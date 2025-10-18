@@ -2,7 +2,6 @@ import { createRequestHandler } from "@remix-run/express";
 import express from "express";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Disable x-powered-by header
 app.disable("x-powered-by");
@@ -19,7 +18,7 @@ app.use(
 // Serve other static assets
 app.use(express.static("public", { maxAge: "1h" }));
 
-// Load the build on startup
+// Load the build
 const build = await import("./build/index.js");
 
 // Handle all Remix requests
@@ -31,6 +30,5 @@ app.all(
   })
 );
 
-app.listen(PORT, () => {
-  console.log(`Express server listening on port ${PORT}`);
-});
+// Export for Vercel serverless
+export default app;
