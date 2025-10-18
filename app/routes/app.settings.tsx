@@ -10,6 +10,8 @@ import {
   Button,
   Banner,
   FormLayout,
+  Text,
+  InlineStack,
 } from "@shopify/polaris";
 import { useState, useCallback, useEffect } from "react";
 import { authenticate } from "~/shopify.server";
@@ -124,14 +126,36 @@ export default function SettingsPage() {
                     helpText="When enabled, customers will receive their QR codes by email after purchase"
                   />
 
-                  <TextField
-                    label="Brand Color"
-                    type="color"
-                    value={brandColor}
-                    onChange={setBrandColor}
-                    helpText="This color will be used in ticket emails"
-                    autoComplete="off"
-                  />
+                  <BlockStack gap="200">
+                    <label style={{ fontSize: "14px", fontWeight: 500, color: "var(--p-color-text, #202223)" }}>
+                      Brand Color
+                    </label>
+                    <InlineStack gap="200" blockAlign="center">
+                      <input
+                        type="color"
+                        value={brandColor}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        style={{
+                          width: "60px",
+                          height: "36px",
+                          border: "1px solid var(--p-color-border, #c9cccf)",
+                          borderRadius: "var(--p-border-radius-200, 8px)",
+                          cursor: "pointer",
+                        }}
+                      />
+                      <TextField
+                        label=""
+                        labelHidden
+                        value={brandColor}
+                        onChange={setBrandColor}
+                        autoComplete="off"
+                        placeholder="#5C6AC4"
+                      />
+                    </InlineStack>
+                    <Text as="p" variant="bodySm" tone="subdued">
+                      This color will be used in ticket emails
+                    </Text>
+                  </BlockStack>
 
                   <TextField
                     label="Brand Logo URL"
@@ -156,25 +180,25 @@ export default function SettingsPage() {
 
             <Card>
               <BlockStack gap="400">
-                <text as="h2" variant="headingMd" fontWeight="semibold">
+                <Text as="h2" variant="headingMd" fontWeight="semibold">
                   Setup Instructions
-                </text>
+                </Text>
                 <BlockStack gap="300">
-                  <text as="p" variant="bodySm">
+                  <Text as="p" variant="bodySm">
                     <strong>Step 1:</strong> Tag your event/ticket products with "{ticketTag}" in
                     Shopify
-                  </text>
-                  <text as="p" variant="bodySm">
+                  </Text>
+                  <Text as="p" variant="bodySm">
                     <strong>Step 2:</strong> When customers purchase these products, QR codes
                     will be generated automatically
-                  </text>
-                  <text as="p" variant="bodySm">
+                  </Text>
+                  <Text as="p" variant="bodySm">
                     <strong>Step 3:</strong> Customers receive QR codes via email (if enabled)
-                  </text>
-                  <text as="p" variant="bodySm">
+                  </Text>
+                  <Text as="p" variant="bodySm">
                     <strong>Step 4:</strong> Use the Validiam mobile app to scan QR codes at your
                     event
-                  </text>
+                  </Text>
                 </BlockStack>
               </BlockStack>
             </Card>
@@ -184,16 +208,16 @@ export default function SettingsPage() {
         <Layout.Section variant="oneThird">
           <Card>
             <BlockStack gap="400">
-              <text as="h2" variant="headingMd" fontWeight="semibold">
+              <Text as="h2" variant="headingMd" fontWeight="semibold">
                 Email Configuration
-              </text>
+              </Text>
               <BlockStack gap="200">
-                <text as="p" variant="bodySm" tone="subdued">
+                <Text as="p" variant="bodySm" tone="subdued">
                   Email settings are configured through environment variables.
-                </text>
-                <text as="p" variant="bodySm" tone="subdued">
+                </Text>
+                <Text as="p" variant="bodySm" tone="subdued">
                   Contact your administrator to update SMTP settings if needed.
-                </text>
+                </Text>
               </BlockStack>
             </BlockStack>
           </Card>

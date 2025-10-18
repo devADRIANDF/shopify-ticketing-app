@@ -1,10 +1,18 @@
 {
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
     "isolatedModules": true,
     "esModuleInterop": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -14,10 +22,24 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"]
+      "~/*": [
+        "./app/*"
+      ]
     },
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["@remix-run/node", "vite/client"]
-  }
+    "types": [
+      "@remix-run/node",
+      "vite/client"
+    ],
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

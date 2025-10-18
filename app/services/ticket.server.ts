@@ -108,7 +108,8 @@ export async function sendTicketsEmail(
     }, {} as Record<string, any[]>);
 
     // Send email for each buyer
-    for (const [email, buyerTickets] of Object.entries(ticketsByEmail)) {
+    for (const [email, ticketsValue] of Object.entries(ticketsByEmail)) {
+      const buyerTickets = ticketsValue as any[];
       const emailTickets = buyerTickets.map((t) => ({
         ticketType: t.ticketType,
         qrCodeDataUrl: t.qrCode,

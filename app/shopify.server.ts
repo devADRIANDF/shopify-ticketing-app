@@ -3,6 +3,7 @@ import {
   ApiVersion,
   AppDistribution,
   shopifyApp,
+  DeliveryMethod,
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { prisma } from "./lib/db.server";
@@ -22,7 +23,7 @@ const shopify = shopifyApp({
   restResources,
   webhooks: {
     ORDERS_CREATE: {
-      deliveryMethod: "http",
+      deliveryMethod: DeliveryMethod.Http,
       callbackUrl: "/api/webhooks/orders/create",
     },
   },
