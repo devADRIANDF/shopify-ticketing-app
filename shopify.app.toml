@@ -2,7 +2,7 @@
 
 name = "validiam"
 client_id = "cc4511f9341d22ee8d454f3d2c1200fe"
-application_url = "https://shopify-ticketing-app.onrender.com"
+application_url = "https://shopify-ticketing-app.onrender.com/app"
 embedded = true
 
 [access_scopes]

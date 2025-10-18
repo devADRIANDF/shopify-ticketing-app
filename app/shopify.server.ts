@@ -16,11 +16,12 @@ const shopify = shopifyApp({
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
   apiVersion: ApiVersion.January24,
   scopes: process.env.SCOPES?.split(",") || [],
-  appUrl: process.env.SHOPIFY_APP_URL || "",
+  appUrl: (process.env.SHOPIFY_APP_URL || "") + "/app",
   authPathPrefix: "/auth",
   sessionStorage: prismaSessionStorage,
   distribution: AppDistribution.AppStore,
   restResources,
+  isEmbeddedApp: true,
   webhooks: {
     ORDERS_CREATE: {
       deliveryMethod: DeliveryMethod.Http,

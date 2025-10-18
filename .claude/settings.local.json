@@ -1,14 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build)",
-      "Bash(npm install @remix-run/vercel@^2.5.1)",
-      "Bash(git add api/index.js vercel.json vite.config.ts VERCEL_DEPLOYMENT.md)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Improve Vercel serverless handler for Remix\n\n- Updated api/index.js to properly convert Vercel req/res to Fetch API\n- Improved error handling with detailed logging\n- Updated vercel.json buildCommand to use prisma generate instead of full setup\n- Added NODE_ENV environment variable configuration\n- Updated vite.config.ts with serverBuildFile and SSR externals\n- Added VERCEL_DEPLOYMENT.md with complete deployment instructions\n\nThis should fix the 500 FUNCTION_INVOCATION_FAILED error in Vercel.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push origin master)",
-      "Bash(npm install express@^4.18.2)",
-      "Bash(git add package.json package-lock.json server.js vercel.json VERCEL_DEPLOYMENT.md)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Change from serverless to Node.js server for Vercel\n\nThis fixes the \"Cannot find module '/var/task/build/index.js'\" error.\n\nChanges:\n- Added server.js with Express to handle all Remix requests\n- Updated package.json to include Express dependency\n- Modified vercel.json to use @vercel/node instead of serverless functions\n- Updated start script to use node server.js\n- Updated VERCEL_DEPLOYMENT.md with new architecture details\n\nThe app now runs as a persistent Node.js server on Vercel instead of \nserverless functions, providing better compatibility with Remix.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git add -A)"
     ],
     "deny": [],
     "ask": []
