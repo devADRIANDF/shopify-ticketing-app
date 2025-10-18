@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [
     remix({
       ignoredRouteFiles: ["**/.*"],
+      serverBuildFile: "index.js",
     }),
   ],
   server: {
