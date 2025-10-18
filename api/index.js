@@ -8,19 +8,19 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Serve static files
-app.use("/build", express.static(path.join(__dirname, "../public/build"), {
+// Serve static files from local api directory (copied during build)
+app.use("/build", express.static(path.join(__dirname, "public/build"), {
   immutable: true,
   maxAge: "1y"
 }));
 
-app.use(express.static(path.join(__dirname, "../public"), { maxAge: "1h" }));
+app.use(express.static(path.join(__dirname, "public"), { maxAge: "1h" }));
 
 // Remix handler
 app.all("*", async (req, res, next) => {
   try {
-    // Dynamic import to avoid issues with build
-    const build = await import("../build/index.js");
+    // Import from local build directory (copied during build)
+    const build = await import("./build/index.js");
 
     const handler = createRequestHandler({
       build,
@@ -30,6 +30,7 @@ app.all("*", async (req, res, next) => {
     return handler(req, res, next);
   } catch (error) {
     console.error("Error loading Remix build:", error);
+    console.error("__dirname:", __dirname);
     next(error);
   }
 });
