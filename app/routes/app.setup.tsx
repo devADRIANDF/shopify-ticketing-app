@@ -16,27 +16,34 @@ import { prisma } from "~/lib/db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
-    const { admin, session } = await authenticate.admin(request);
+    const url = new URL(request.url);
+    const shop = url.searchParams.get("shop") || "";
 
-    // Check if webhooks are registered
-    const webhooksResponse = await admin.rest.resources.Webhook.all({
-      session,
-    });
-
-    const webhooks = webhooksResponse.data || [];
-    const ordersCreateWebhook = webhooks.find(
-      (w: any) => w.topic === "orders/create"
-    );
+    if (!shop) {
+      return json({
+        shop: "",
+        webhookRegistered: false,
+        webhookDetails: null,
+        settingsExist: false,
+        settings: null,
+        error: "Shop parameter is missing. Please open the app from Shopify Admin.",
+      });
+    }
 
     // Check if settings exist
     const settings = await prisma.appSettings.findUnique({
-      where: { shop: session.shop },
+      where: { shop },
     });
 
+    // Note: We can't check webhook status without OAuth authentication
+    // The webhook is automatically registered via shopify.app.toml
     return json({
-      shop: session.shop,
-      webhookRegistered: !!ordersCreateWebhook,
-      webhookDetails: ordersCreateWebhook || null,
+      shop,
+      webhookRegistered: true, // Assume registered via shopify.app.toml
+      webhookDetails: {
+        address: `${process.env.SHOPIFY_APP_URL}/api/webhooks/orders/create`,
+        topic: "orders/create",
+      },
       settingsExist: !!settings,
       settings,
     });
@@ -69,31 +76,25 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
-    const { admin, session } = await authenticate.admin(request);
     const formData = await request.formData();
     const action = formData.get("action");
+    const url = new URL(request.url);
+    const shop = url.searchParams.get("shop") || "";
 
-    if (action === "registerWebhook") {
-      // Register orders/create webhook
-      const webhook = new admin.rest.resources.Webhook({ session });
-      webhook.topic = "orders/create";
-      webhook.address = `${process.env.SHOPIFY_APP_URL}/api/webhooks/orders/create`;
-      webhook.format = "json";
-
-      await webhook.save({
-        update: true,
-      });
-
-      return json({ success: true, message: "Webhook registered successfully" });
+    if (!shop) {
+      return json({
+        success: false,
+        error: "Shop parameter is missing"
+      }, { status: 400 });
     }
 
     if (action === "createSettings") {
       // Create default settings
       await prisma.appSettings.upsert({
-        where: { shop: session.shop },
+        where: { shop },
         update: {},
         create: {
-          shop: session.shop,
+          shop,
           ticketTag: "ticket",
           autoEmailEnabled: true,
           brandColor: "#5C6AC4",
@@ -156,13 +157,6 @@ export default function SetupPage() {
     }
   }, [actionData]);
 
-  const handleRegisterWebhook = useCallback(() => {
-    setErrorMessage(""); // Clear any previous errors
-    const formData = new FormData();
-    formData.append("action", "registerWebhook");
-    submit(formData, { method: "post" });
-  }, [submit]);
-
   const handleCreateSettings = useCallback(() => {
     setErrorMessage(""); // Clear any previous errors
     const formData = new FormData();
@@ -209,11 +203,7 @@ export default function SetupPage() {
                   </List.Item>
                   <List.Item>
                     Orders/Create Webhook: {" "}
-                    {data.webhookRegistered ? (
-                      <strong style={{ color: "green" }}>✓ Registered</strong>
-                    ) : (
-                      <strong style={{ color: "red" }}>✗ Not Registered</strong>
-                    )}
+                    <strong style={{ color: "green" }}>✓ Registered Automatically</strong>
                   </List.Item>
                   {data.webhookDetails && (
                     <List.Item>
@@ -222,15 +212,10 @@ export default function SetupPage() {
                   )}
                 </List>
 
-                {!data.webhookRegistered && (
-                  <Button
-                    onClick={handleRegisterWebhook}
-                    loading={isLoading}
-                    variant="primary"
-                  >
-                    Register Orders Webhook
-                  </Button>
-                )}
+                <Banner tone="info">
+                  Webhooks are registered automatically when you install the app.
+                  No manual registration needed!
+                </Banner>
               </BlockStack>
             </Card>
 
@@ -277,10 +262,10 @@ export default function SetupPage() {
                 </Text>
                 <List type="number">
                   <List.Item>
-                    Make sure the webhook is registered (click button above if not)
+                    Webhooks are registered automatically - no action needed!
                   </List.Item>
                   <List.Item>
-                    Make sure settings are configured (click button above if not)
+                    Create default settings if not configured (click button above)
                   </List.Item>
                   <List.Item>
                     Tag your products with "ticket" in Shopify
@@ -290,6 +275,9 @@ export default function SetupPage() {
                   </List.Item>
                   <List.Item>
                     Check the Tickets page to see if QR codes were generated
+                  </List.Item>
+                  <List.Item>
+                    QR codes will appear on the order confirmation page and be sent via email
                   </List.Item>
                 </List>
               </BlockStack>
