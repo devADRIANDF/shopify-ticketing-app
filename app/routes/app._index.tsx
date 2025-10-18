@@ -192,6 +192,9 @@ export default function Index() {
                   Quick Actions
                 </Text>
                 <BlockStack gap="200">
+                  <Button fullWidth variant="primary" onClick={() => navigate("/app/setup")}>
+                    🔧 Setup & Webhooks
+                  </Button>
                   <Button fullWidth onClick={() => navigate("/app/tickets")}>
                     View All Tickets
                   </Button>
