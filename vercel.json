@@ -1,0 +1,14 @@
+{
+  "buildCommand": "npm run setup && remix build",
+  "installCommand": "npm install",
+  "routes": [
+    {
+      "src": "/build/(.*)",
+      "dest": "/public/build/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.js"
+    }
+  ]
+}

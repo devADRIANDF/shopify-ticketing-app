@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 name = "validiam"
-client_id = ""
-application_url = "https://your-tunnel-url.com"
+client_id = "cc4511f9341d22ee8d454f3d2c1200fe"
+application_url = "https://shopify-ticketing-app.vercel.app"
 embedded = true
 
 [access_scopes]
@@ -10,9 +10,9 @@ scopes = "write_products,read_orders,write_webhooks,read_customers"
 
 [auth]
 redirect_urls = [
-  "https://your-tunnel-url.com/auth/callback",
-  "https://your-tunnel-url.com/auth/shopify/callback",
-  "https://your-tunnel-url.com/api/auth/callback"
+  "https://shopify-ticketing-app.vercel.app/auth/callback",
+  "https://shopify-ticketing-app.vercel.app/auth/shopify/callback",
+  "https://shopify-ticketing-app.vercel.app/api/auth/callback"
 ]
 
 [webhooks]
