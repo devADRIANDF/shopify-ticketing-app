@@ -75,6 +75,10 @@ export default function ExportPage() {
   const navigation = useNavigation();
   const submit = useSubmit();
 
+  // Get shop from URL to preserve in navigation
+  const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
+  const shop = url?.searchParams.get("shop") || "";
+
   const [status, setStatus] = useState("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -97,7 +101,7 @@ export default function ExportPage() {
     <Page
       title="Export Tickets"
       subtitle="Download ticket data as CSV"
-      backAction={{ content: "Dashboard", url: "/app" }}
+      backAction={{ content: "Dashboard", url: `/app?shop=${shop}` }}
     >
       <Layout>
         <Layout.Section>

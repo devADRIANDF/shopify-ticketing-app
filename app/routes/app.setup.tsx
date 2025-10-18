@@ -102,6 +102,10 @@ export default function SetupPage() {
   const navigation = useNavigation();
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Get shop from URL to preserve in navigation
+  const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
+  const shop = url?.searchParams.get("shop") || "";
+
   const isLoading = navigation.state === "submitting";
 
   const handleRegisterWebhook = useCallback(() => {
@@ -124,7 +128,7 @@ export default function SetupPage() {
     <Page
       title="App Setup"
       subtitle="Configure webhooks and settings"
-      backAction={{ content: "Dashboard", url: "/app" }}
+      backAction={{ content: "Dashboard", url: `/app?shop=${shop}` }}
     >
       <Layout>
         <Layout.Section>

@@ -60,9 +60,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function Index() {
-  const { tickets, stats } = useLoaderData<typeof loader>();
+  const { tickets, stats, shop } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
   const [selectedQR, setSelectedQR] = useState<string | null>(null);
+
+  const navigateWithShop = (path: string) => {
+    navigate(`${path}?shop=${shop}`);
+  };
 
   return (
     <Page
@@ -70,16 +74,16 @@ export default function Index() {
       subtitle="Manage event tickets and QR codes"
       primaryAction={{
         content: "Settings",
-        onAction: () => navigate("/app/settings"),
+        onAction: () => navigateWithShop("/app/settings"),
       }}
       secondaryActions={[
         {
           content: "All Tickets",
-          onAction: () => navigate("/app/tickets"),
+          onAction: () => navigateWithShop("/app/tickets"),
         },
         {
           content: "Export CSV",
-          onAction: () => navigate("/app/export"),
+          onAction: () => navigateWithShop("/app/export"),
         },
       ]}
     >
@@ -192,16 +196,16 @@ export default function Index() {
                   Quick Actions
                 </Text>
                 <BlockStack gap="200">
-                  <Button fullWidth variant="primary" onClick={() => navigate("/app/setup")}>
+                  <Button fullWidth variant="primary" onClick={() => navigateWithShop("/app/setup")}>
                     🔧 Setup & Webhooks
                   </Button>
-                  <Button fullWidth onClick={() => navigate("/app/tickets")}>
+                  <Button fullWidth onClick={() => navigateWithShop("/app/tickets")}>
                     View All Tickets
                   </Button>
-                  <Button fullWidth onClick={() => navigate("/app/settings")}>
+                  <Button fullWidth onClick={() => navigateWithShop("/app/settings")}>
                     Configure Settings
                   </Button>
-                  <Button fullWidth onClick={() => navigate("/app/export")}>
+                  <Button fullWidth onClick={() => navigateWithShop("/app/export")}>
                     Export Data
                   </Button>
                 </BlockStack>

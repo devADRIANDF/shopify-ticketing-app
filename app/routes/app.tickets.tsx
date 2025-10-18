@@ -61,6 +61,9 @@ export default function TicketsPage() {
   const [selectedQR, setSelectedQR] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Get shop from URL to preserve in navigation
+  const shop = searchParams.get("shop") || "";
+
   const handleStatusChange = useCallback(
     (value: string) => {
       const newParams = new URLSearchParams(searchParams);
@@ -99,10 +102,10 @@ export default function TicketsPage() {
     <Page
       title="All Tickets"
       subtitle={`${total} total tickets`}
-      backAction={{ content: "Dashboard", onAction: () => navigate("/app") }}
+      backAction={{ content: "Dashboard", onAction: () => navigate(`/app?shop=${shop}`) }}
       primaryAction={{
         content: "Export CSV",
-        onAction: () => navigate("/app/export"),
+        onAction: () => navigate(`/app/export?shop=${shop}`),
       }}
     >
       <BlockStack gap="400">

@@ -84,6 +84,10 @@ export default function SettingsPage() {
   const submit = useSubmit();
   const navigation = useNavigation();
 
+  // Get shop from URL to preserve in navigation
+  const url = typeof window !== 'undefined' ? new URL(window.location.href) : null;
+  const shop = url?.searchParams.get("shop") || "";
+
   const [ticketTag, setTicketTag] = useState(settings.ticketTag);
   const [autoEmailEnabled, setAutoEmailEnabled] = useState(settings.autoEmailEnabled);
   const [brandColor, setBrandColor] = useState(settings.brandColor);
@@ -117,7 +121,7 @@ export default function SettingsPage() {
     <Page
       title="Settings"
       subtitle="Configure your ticket system"
-      backAction={{ content: "Dashboard", url: "/app" }}
+      backAction={{ content: "Dashboard", url: `/app?shop=${shop}` }}
     >
       <Layout>
         <Layout.Section>
