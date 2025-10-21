@@ -23,6 +23,7 @@ function Extension() {
       try {
         console.log("[QR Extension] Order confirmation:", orderConfirmation);
         console.log("[QR Extension] Order confirmation.current:", orderConfirmation?.current);
+        console.log("[QR Extension] All available fields:", JSON.stringify(orderConfirmation?.current, null, 2));
         console.log("[QR Extension] Shop:", shop);
 
         // Get the order ID and number
@@ -47,35 +48,54 @@ function Extension() {
         if (numericOrderId) params.append("orderId", numericOrderId);
         if (orderNumber) params.append("orderNumber", orderNumber);
 
-        const response = await fetch(
-          `https://shopify-ticketing-app.onrender.com/api/tickets/by-order?${params.toString()}`,
-          {
+        const apiUrl = `https://shopify-ticketing-app.onrender.com/api/tickets/by-order?${params.toString()}`;
+
+        // Retry logic: webhook might not have created tickets yet
+        // Try up to 5 times with increasing delays
+        const maxRetries = 5;
+        const delays = [1000, 2000, 3000, 4000, 5000]; // 1s, 2s, 3s, 4s, 5s
+
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          console.log(`[QR Extension] Fetch attempt ${attempt + 1}/${maxRetries}`);
+
+          const response = await fetch(apiUrl, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
           }
-        );
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          console.log(`[QR Extension] Attempt ${attempt + 1} received:`, data);
+
+          if (data.tickets && Array.isArray(data.tickets) && data.tickets.length > 0) {
+            // Success! We found tickets
+            console.log("[QR Extension] ✅ Found tickets!");
+            const formattedTickets = data.tickets.map((ticket: any) => ({
+              id: ticket.id,
+              productTitle: ticket.productTitle,
+              shopifyOrderName: ticket.shopifyOrderName,
+              qrCodeDataUrl: ticket.qrCode,
+              status: ticket.status,
+            }));
+            setTickets(formattedTickets);
+            setLoading(false);
+            return;
+          }
+
+          // No tickets yet, wait before retrying (unless this was the last attempt)
+          if (attempt < maxRetries - 1) {
+            console.log(`[QR Extension] No tickets yet, waiting ${delays[attempt]}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+          }
         }
 
-        const data = await response.json();
-        console.log("[QR Extension] Received tickets:", data);
-
-        if (data.tickets && Array.isArray(data.tickets) && data.tickets.length > 0) {
-          // Map tickets to the format expected by the UI
-          const formattedTickets = data.tickets.map((ticket: any) => ({
-            id: ticket.id,
-            productTitle: ticket.productTitle,
-            shopifyOrderName: ticket.shopifyOrderName,
-            qrCodeDataUrl: ticket.qrCode,
-            status: ticket.status,
-          }));
-          setTickets(formattedTickets);
-        }
-
+        // If we get here, we tried all retries and found no tickets
+        console.log("[QR Extension] ⚠️ No tickets found after all retries");
         setLoading(false);
       } catch (err) {
         console.error("[QR Extension] Error fetching tickets:", err);

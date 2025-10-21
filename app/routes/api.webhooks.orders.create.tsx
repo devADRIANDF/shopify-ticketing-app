@@ -9,10 +9,11 @@ import { prisma } from "~/lib/db.server";
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
-    console.log(`[Webhook] Incoming orders/create webhook request`);
+    const webhookStartTime = new Date().toISOString();
+    console.log(`[Webhook] [${webhookStartTime}] Incoming orders/create webhook request`);
     const { shop, payload, session, admin } = await authenticate.webhook(request);
 
-    console.log(`[Webhook] Orders/Create received for shop: ${shop}`);
+    console.log(`[Webhook] [${webhookStartTime}] Orders/Create received for shop: ${shop}`);
     console.log(`[Webhook] Session:`, session ? "exists" : "undefined");
     console.log(`[Webhook] Admin:`, admin ? "exists" : "undefined");
     console.log(`[Webhook] Order details:`, {
@@ -118,8 +119,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       });
 
       if (result.success) {
+        const ticketCreatedTime = new Date().toISOString();
         console.log(
-          `[Webhook] Created ${result.tickets.length} tickets for line item ${lineItem.id}`
+          `[Webhook] [${ticketCreatedTime}] ✅ Created ${result.tickets.length} tickets for line item ${lineItem.id}`
         );
         allTickets.push(...result.tickets);
       } else {

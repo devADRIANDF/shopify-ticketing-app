@@ -7,6 +7,7 @@ import { prisma } from "~/lib/db.server";
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
+    const requestTime = new Date().toISOString();
     const url = new URL(request.url);
     const orderId = url.searchParams.get("orderId");
     const orderNumber = url.searchParams.get("orderNumber");
@@ -18,7 +19,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       );
     }
 
-    console.log("[API] Fetching tickets for order:", { orderId, orderNumber });
+    console.log(`[API] [${requestTime}] Fetching tickets for order:`, { orderId, orderNumber });
 
     // Get tickets for this order - search by both ID and order number
     const tickets = await prisma.ticket.findMany({
