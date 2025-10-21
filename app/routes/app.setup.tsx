@@ -324,53 +324,28 @@ export default function SetupPage() {
             <Card>
               <BlockStack gap="400">
                 <Text as="h2" variant="headingMd" fontWeight="semibold">
-                  Metafield Configuration
-                </Text>
-                <Text as="p" variant="bodyMd">
-                  The app needs to register a custom metafield definition to store ticket QR codes on orders.
-                  Click the button below to set it up.
-                </Text>
-                <Button
-                  onClick={handleSetupMetafields}
-                  loading={isLoading}
-                  variant="primary"
-                >
-                  Setup Order Metafields
-                </Button>
-                <Banner tone="info">
-                  This only needs to be done once. If already configured, clicking will confirm it exists.
-                </Banner>
-              </BlockStack>
-            </Card>
-
-            <Card>
-              <BlockStack gap="400">
-                <Text as="h2" variant="headingMd" fontWeight="semibold">
-                  Instructions
+                  Quick Start Instructions
                 </Text>
                 <List type="number">
                   <List.Item>
-                    Click "Setup Order Metafields" above (IMPORTANT!)
+                    Create default settings (click button above if not configured)
                   </List.Item>
                   <List.Item>
-                    Webhooks are registered automatically - no action needed!
-                  </List.Item>
-                  <List.Item>
-                    Create default settings if not configured (click button above)
-                  </List.Item>
-                  <List.Item>
-                    Tag your products with "ticket" in Shopify
+                    Tag your products with <strong>"ticket"</strong> in Shopify
                   </List.Item>
                   <List.Item>
                     Create a test order with a ticket product
                   </List.Item>
                   <List.Item>
-                    Check the Tickets page to see if QR codes were generated
+                    Check the "Tickets" page to see if QR codes were generated
                   </List.Item>
                   <List.Item>
-                    QR codes will appear on the order confirmation page and be sent via email
+                    QR codes will appear on the order thank you page and be sent via email
                   </List.Item>
                 </List>
+                <Banner tone="info">
+                  Webhooks are registered automatically when you install the app. No manual setup needed!
+                </Banner>
               </BlockStack>
             </Card>
           </BlockStack>
