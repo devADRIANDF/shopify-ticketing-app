@@ -9,25 +9,27 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const url = new URL(request.url);
     const orderId = url.searchParams.get("orderId");
-    const shop = url.searchParams.get("shop");
 
-    if (!orderId || !shop) {
+    if (!orderId) {
       return json(
-        { error: "Missing orderId or shop parameter" },
+        { error: "Missing orderId parameter" },
         { status: 400 }
       );
     }
 
-    // Get tickets for this order
+    console.log("[API] Fetching tickets for order:", orderId);
+
+    // Get tickets for this order (we don't need shop since orderId is unique)
     const tickets = await prisma.ticket.findMany({
       where: {
         shopifyOrderId: orderId,
-        shop: shop,
       },
       orderBy: {
         createdAt: "desc",
       },
     });
+
+    console.log(`[API] Found ${tickets.length} tickets for order ${orderId}`);
 
     // Return tickets with QR codes
     return json(
