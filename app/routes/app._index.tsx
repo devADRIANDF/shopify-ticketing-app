@@ -199,8 +199,8 @@ export default function Index() {
                   <Button fullWidth variant="primary" onClick={() => navigateWithShop("/app/setup")}>
                     🔧 Setup & Webhooks
                   </Button>
-                  <Button fullWidth onClick={() => navigateWithShop("/app/test-webhook")}>
-                    🧪 Test Webhook
+                  <Button fullWidth onClick={() => navigateWithShop("/app/debug-order")}>
+                    🔍 Debug Order
                   </Button>
                   <Button fullWidth onClick={() => navigateWithShop("/app/tickets")}>
                     View All Tickets
