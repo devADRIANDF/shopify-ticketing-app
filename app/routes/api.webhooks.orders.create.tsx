@@ -10,9 +10,11 @@ import { prisma } from "~/lib/db.server";
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     console.log(`[Webhook] Incoming orders/create webhook request`);
-    const { shop, payload, admin } = await authenticate.webhook(request);
+    const { shop, payload, session, admin } = await authenticate.webhook(request);
 
     console.log(`[Webhook] Orders/Create received for shop: ${shop}`);
+    console.log(`[Webhook] Session:`, session ? "exists" : "undefined");
+    console.log(`[Webhook] Admin:`, admin ? "exists" : "undefined");
     console.log(`[Webhook] Order details:`, {
       id: (payload as any).id,
       name: (payload as any).name,
@@ -129,66 +131,72 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     if (allTickets.length > 0) {
       console.log(`[Webhook] Saving ${allTickets.length} tickets to order metafields`);
 
-      try {
-        const ticketsData = allTickets.map(ticket => ({
-          id: ticket.id,
-          productTitle: ticket.productTitle,
-          shopifyOrderName: ticket.shopifyOrderName,
-          qrCodeDataUrl: ticket.qrCode,
-          status: ticket.status,
-        }));
+      if (!admin) {
+        console.error("[Webhook] ❌ CRITICAL: admin is undefined - cannot save metafields");
+        console.log("[Webhook] This is a known limitation - webhooks don't have admin GraphQL access");
+        console.log("[Webhook] Tickets created in DB but won't show on thank you page");
+      } else {
+        try {
+          const ticketsData = allTickets.map(ticket => ({
+            id: ticket.id,
+            productTitle: ticket.productTitle,
+            shopifyOrderName: ticket.shopifyOrderName,
+            qrCodeDataUrl: ticket.qrCode,
+            status: ticket.status,
+          }));
 
-        const ticketsDataString = JSON.stringify(ticketsData);
-        console.log("[Webhook] Tickets data to save:", ticketsDataString.substring(0, 200) + "...");
+          const ticketsDataString = JSON.stringify(ticketsData);
+          console.log("[Webhook] Tickets data to save:", ticketsDataString.substring(0, 200) + "...");
 
-        // Use metafieldsSet mutation instead of orderUpdate
-        const metafieldMutation = `
-          mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
-            metafieldsSet(metafields: $metafields) {
-              metafields {
-                id
-                namespace
-                key
-                value
-              }
-              userErrors {
-                field
-                message
+          // Use metafieldsSet mutation instead of orderUpdate
+          const metafieldMutation = `
+            mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+              metafieldsSet(metafields: $metafields) {
+                metafields {
+                  id
+                  namespace
+                  key
+                  value
+                }
+                userErrors {
+                  field
+                  message
+                }
               }
             }
+          `;
+
+          const response = await admin.graphql(metafieldMutation, {
+            variables: {
+              metafields: [
+                {
+                  ownerId: `gid://shopify/Order/${orderId}`,
+                  namespace: "validiam",
+                  key: "tickets",
+                  type: "json",
+                  value: ticketsDataString,
+                },
+              ],
+            },
+          });
+
+          console.log("[Webhook] GraphQL response status:", response.status);
+          const result = await response.json();
+          console.log("[Webhook] GraphQL result:", JSON.stringify(result, null, 2));
+
+          if (result.data?.metafieldsSet?.userErrors?.length > 0) {
+            console.error("[Webhook] ❌ Error saving metafield:", result.data.metafieldsSet.userErrors);
+          } else if (result.data?.metafieldsSet?.metafields?.length > 0) {
+            console.log("[Webhook] ✅ Tickets saved to order metafields successfully!");
+            console.log("[Webhook] Metafield ID:", result.data.metafieldsSet.metafields[0].id);
+          } else {
+            console.error("[Webhook] ❌ Unexpected response - no metafields or errors:", result);
           }
-        `;
-
-        const response = await admin.graphql(metafieldMutation, {
-          variables: {
-            metafields: [
-              {
-                ownerId: `gid://shopify/Order/${orderId}`,
-                namespace: "validiam",
-                key: "tickets",
-                type: "json",
-                value: ticketsDataString,
-              },
-            ],
-          },
-        });
-
-        console.log("[Webhook] GraphQL response status:", response.status);
-        const result = await response.json();
-        console.log("[Webhook] GraphQL result:", JSON.stringify(result, null, 2));
-
-        if (result.data?.metafieldsSet?.userErrors?.length > 0) {
-          console.error("[Webhook] ❌ Error saving metafield:", result.data.metafieldsSet.userErrors);
-        } else if (result.data?.metafieldsSet?.metafields?.length > 0) {
-          console.log("[Webhook] ✅ Tickets saved to order metafields successfully!");
-          console.log("[Webhook] Metafield ID:", result.data.metafieldsSet.metafields[0].id);
-        } else {
-          console.error("[Webhook] ❌ Unexpected response - no metafields or errors:", result);
+        } catch (error) {
+          console.error("[Webhook] ❌ CRITICAL ERROR saving tickets to metafields:", error);
+          console.error("[Webhook] Error type:", error?.constructor?.name);
+          console.error("[Webhook] Error message:", error instanceof Error ? error.message : String(error));
         }
-      } catch (error) {
-        console.error("[Webhook] ❌ CRITICAL ERROR saving tickets to metafields:", error);
-        console.error("[Webhook] Error type:", error?.constructor?.name);
-        console.error("[Webhook] Error message:", error instanceof Error ? error.message : String(error));
       }
     }
 

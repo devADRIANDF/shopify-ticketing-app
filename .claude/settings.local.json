@@ -23,7 +23,8 @@
       "Bash(git commit -m \"$(cat <<''EOF''\nAdd: Debug order page to check metafields\n\n- Created debug page to inspect order metafields\n- Shows all metafields on an order\n- Specifically highlights tickets metafield\n- Helps diagnose why extension can''t read metafields\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git add app/routes/api.setup.tsx)",
       "Bash(git commit -m \"Add simple setup endpoint for metafield definition\")",
-      "Bash(git commit -m \"Fix: Use metafieldsSet mutation for better metafield saving\n\n- Changed from orderUpdate to metafieldsSet mutation\n- Added extensive logging to debug metafield save\n- Better error handling and reporting\n- Should now properly save metafields to orders\")"
+      "Bash(git commit -m \"Fix: Use metafieldsSet mutation for better metafield saving\n\n- Changed from orderUpdate to metafieldsSet mutation\n- Added extensive logging to debug metafield save\n- Better error handling and reporting\n- Should now properly save metafields to orders\")",
+      "Bash(git commit -m \"Debug: Check if admin exists in webhook\")"
     ],
     "deny": [],
     "ask": []
