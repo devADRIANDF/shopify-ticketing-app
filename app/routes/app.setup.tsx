@@ -16,9 +16,19 @@ import { prisma } from "~/lib/db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
-    // Authenticate first to establish session
-    const { session } = await authenticate.admin(request);
-    const shop = session.shop;
+    const url = new URL(request.url);
+    const shop = url.searchParams.get("shop") || "";
+
+    if (!shop) {
+      return json({
+        shop: "",
+        webhookRegistered: false,
+        webhookDetails: null,
+        settingsExist: false,
+        settings: null,
+        error: "Shop parameter is missing. Please open the app from Shopify Admin.",
+      });
+    }
 
     // Check if settings exist
     const settings = await prisma.appSettings.findUnique({
@@ -65,12 +75,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
-    // Authenticate to get session
-    const { session, admin } = await authenticate.admin(request);
-    const shop = session.shop;
-
     const formData = await request.formData();
     const action = formData.get("action");
+    const shop = formData.get("shop") as string;
+
+    if (!shop) {
+      return json({
+        success: false,
+        error: "Shop parameter is missing"
+      }, { status: 400 });
+    }
 
     if (action === "createSettings") {
       // Create default settings
@@ -88,112 +102,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ success: true, message: "Settings created successfully" });
     }
 
-    if (action === "setupMetafields") {
-      try {
-        // Create metafield definition for order tickets
-        const mutation = `
-          mutation CreateMetafieldDefinition {
-            metafieldDefinitionCreate(
-              definition: {
-                name: "Tickets"
-                namespace: "validiam"
-                key: "tickets"
-                description: "QR code tickets data for order"
-                type: "json"
-                ownerType: ORDER
-              }
-            ) {
-              createdDefinition {
-                id
-                name
-              }
-              userErrors {
-                field
-                message
-              }
-            }
-          }
-        `;
-
-        console.log("[Setup] Creating metafield definition...");
-        const response = await admin.graphql(mutation);
-
-        // Check if response is ok
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("[Setup] GraphQL request failed:", response.status, errorText);
-          return json({
-            success: false,
-            error: `GraphQL request failed: ${response.status} - ${errorText}`
-          });
-        }
-
-        const result = await response.json();
-        console.log("[Setup] GraphQL response:", JSON.stringify(result, null, 2));
-
-        if (result.data?.metafieldDefinitionCreate?.userErrors?.length > 0) {
-          const errors = result.data.metafieldDefinitionCreate.userErrors;
-          console.log("[Setup] User errors:", errors);
-
-          // If it already exists, that's okay
-          if (errors[0].message?.includes("taken") || errors[0].message?.includes("already exists")) {
-            return json({ success: true, message: "Metafield definition already exists" });
-          }
-          return json({
-            success: false,
-            error: errors.map((e: any) => e.message).join(", ")
-          });
-        }
-
-        console.log("[Setup] Metafield definition created successfully");
-        return json({ success: true, message: "Metafield definition created successfully" });
-      } catch (setupError: any) {
-        console.error("[Setup] Error in setupMetafields:", setupError);
-
-        // Handle Response objects specifically
-        if (setupError instanceof Response) {
-          try {
-            const errorBody = await setupError.text();
-            return json({
-              success: false,
-              error: `Authentication or API error: ${setupError.status} - ${errorBody}`
-            });
-          } catch {
-            return json({
-              success: false,
-              error: `Authentication or API error: ${setupError.status}`
-            });
-          }
-        }
-
-        return json({
-          success: false,
-          error: setupError.message || "Failed to setup metafields"
-        });
-      }
-    }
-
     return json({ success: false, message: "Unknown action" });
   } catch (error: any) {
     console.error("Setup action error:", error);
 
-    // Extract meaningful error message
-    let errorMessage = "Unknown error occurred";
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (error?.message) {
-      errorMessage = error.message;
-    } else if (typeof error === "string") {
-      errorMessage = error;
-    } else if (error?.toString && error.toString() !== "[object Object]") {
-      errorMessage = error.toString();
-    }
-
     return json({
       success: false,
-      error: errorMessage,
-      details: process.env.NODE_ENV === "development" ? String(error) : undefined
+      error: error?.message || "An error occurred"
     }, { status: 500 });
   }
 };
@@ -227,18 +142,34 @@ export default function SetupPage() {
   }, [actionData]);
 
   const handleCreateSettings = useCallback(() => {
-    setErrorMessage(""); // Clear any previous errors
+    setErrorMessage("");
     const formData = new FormData();
     formData.append("action", "createSettings");
+    formData.append("shop", shop);
     submit(formData, { method: "post" });
-  }, [submit]);
+  }, [submit, shop]);
 
-  const handleSetupMetafields = useCallback(() => {
-    setErrorMessage(""); // Clear any previous errors
-    const formData = new FormData();
-    formData.append("action", "setupMetafields");
-    submit(formData, { method: "post" });
-  }, [submit]);
+  const handleSetupMetafields = useCallback(async () => {
+    setErrorMessage("");
+    setShowSuccess(false);
+
+    try {
+      const response = await fetch(`/api/setup-metafields?shop=${shop}`, {
+        method: "POST",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+      } else {
+        setErrorMessage(result.error || "Failed to setup metafields");
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message || "Failed to setup metafields");
+    }
+  }, [shop]);
 
   return (
     <Page
