@@ -138,12 +138,18 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           status: ticket.status,
         }));
 
-        // Save to order metafield
+        const ticketsDataString = JSON.stringify(ticketsData);
+        console.log("[Webhook] Tickets data to save:", ticketsDataString.substring(0, 200) + "...");
+
+        // Use metafieldsSet mutation instead of orderUpdate
         const metafieldMutation = `
-          mutation UpdateOrderMetafield($input: OrderInput!) {
-            orderUpdate(input: $input) {
-              order {
+          mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+            metafieldsSet(metafields: $metafields) {
+              metafields {
                 id
+                namespace
+                key
+                value
               }
               userErrors {
                 field
@@ -155,38 +161,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
         const response = await admin.graphql(metafieldMutation, {
           variables: {
-            input: {
-              id: `gid://shopify/Order/${orderId}`,
-              metafields: [
-                {
-                  namespace: "validiam",
-                  key: "tickets",
-                  type: "json",
-                  value: JSON.stringify(ticketsData),
-                },
-              ],
-            },
+            metafields: [
+              {
+                ownerId: `gid://shopify/Order/${orderId}`,
+                namespace: "validiam",
+                key: "tickets",
+                type: "json",
+                value: ticketsDataString,
+              },
+            ],
           },
         });
 
+        console.log("[Webhook] GraphQL response status:", response.status);
         const result = await response.json();
+        console.log("[Webhook] GraphQL result:", JSON.stringify(result, null, 2));
 
-        if (result.data?.orderUpdate?.userErrors?.length > 0) {
-          console.error("[Webhook] Error saving metafield:", result.data.orderUpdate.userErrors);
+        if (result.data?.metafieldsSet?.userErrors?.length > 0) {
+          console.error("[Webhook] ❌ Error saving metafield:", result.data.metafieldsSet.userErrors);
+        } else if (result.data?.metafieldsSet?.metafields?.length > 0) {
+          console.log("[Webhook] ✅ Tickets saved to order metafields successfully!");
+          console.log("[Webhook] Metafield ID:", result.data.metafieldsSet.metafields[0].id);
         } else {
-          console.log("[Webhook] Tickets saved to order metafields successfully");
+          console.error("[Webhook] ❌ Unexpected response - no metafields or errors:", result);
         }
       } catch (error) {
-        console.error("[Webhook] Error saving tickets to metafields:", error);
-        // Try to parse error details if it's a Response object
-        if (error instanceof Response) {
-          try {
-            const errorBody = await error.json();
-            console.error("[Webhook] Error details:", JSON.stringify(errorBody, null, 2));
-          } catch (e) {
-            console.error("[Webhook] Could not parse error response");
-          }
-        }
+        console.error("[Webhook] ❌ CRITICAL ERROR saving tickets to metafields:", error);
+        console.error("[Webhook] Error type:", error?.constructor?.name);
+        console.error("[Webhook] Error message:", error instanceof Error ? error.message : String(error));
       }
     }
 
