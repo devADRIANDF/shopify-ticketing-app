@@ -9,27 +9,31 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
     const url = new URL(request.url);
     const orderId = url.searchParams.get("orderId");
+    const orderNumber = url.searchParams.get("orderNumber");
 
-    if (!orderId) {
+    if (!orderId && !orderNumber) {
       return json(
-        { error: "Missing orderId parameter" },
+        { error: "Missing orderId or orderNumber parameter" },
         { status: 400 }
       );
     }
 
-    console.log("[API] Fetching tickets for order:", orderId);
+    console.log("[API] Fetching tickets for order:", { orderId, orderNumber });
 
-    // Get tickets for this order (we don't need shop since orderId is unique)
+    // Get tickets for this order - search by both ID and order number
     const tickets = await prisma.ticket.findMany({
       where: {
-        shopifyOrderId: orderId,
+        OR: [
+          orderId ? { shopifyOrderId: orderId } : {},
+          orderNumber ? { shopifyOrderName: orderNumber } : {},
+        ].filter(obj => Object.keys(obj).length > 0),
       },
       orderBy: {
         createdAt: "desc",
       },
     });
 
-    console.log(`[API] Found ${tickets.length} tickets for order ${orderId}`);
+    console.log(`[API] Found ${tickets.length} tickets for order ${orderId || orderNumber}`);
 
     // Return tickets with QR codes
     return json(

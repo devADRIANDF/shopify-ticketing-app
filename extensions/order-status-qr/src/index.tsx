@@ -25,29 +25,30 @@ function Extension() {
         console.log("[QR Extension] Order confirmation.current:", orderConfirmation?.current);
         console.log("[QR Extension] Shop:", shop);
 
-        // Try different ways to get the order ID
-        let orderId = orderConfirmation?.current?.id;
-
-        if (!orderId) {
-          // Try getting from value property
-          orderId = orderConfirmation?.value?.id;
-        }
+        // Get the order ID and number
+        let orderId = orderConfirmation?.current?.order?.id;
+        let orderNumber = orderConfirmation?.current?.number;
 
         console.log("[QR Extension] Order ID found:", orderId);
+        console.log("[QR Extension] Order number found:", orderNumber);
 
-        if (!orderId) {
-          console.log("[QR Extension] No order ID found");
+        if (!orderId && !orderNumber) {
+          console.log("[QR Extension] No order ID or number found");
           setLoading(false);
           return;
         }
 
-        // Extract numeric order ID from the full ID
-        const numericOrderId = orderId.split('/').pop();
-        console.log("[QR Extension] Fetching tickets for order:", numericOrderId);
+        // Extract numeric order ID from the full ID if available
+        const numericOrderId = orderId ? orderId.split('/').pop() : null;
+        console.log("[QR Extension] Fetching tickets for order:", { numericOrderId, orderNumber });
 
-        // Fetch tickets from the app API
+        // Fetch tickets from the app API - try both ID and order number
+        const params = new URLSearchParams();
+        if (numericOrderId) params.append("orderId", numericOrderId);
+        if (orderNumber) params.append("orderNumber", orderNumber);
+
         const response = await fetch(
-          `https://shopify-ticketing-app.onrender.com/api/tickets/by-order?orderId=${numericOrderId}`,
+          `https://shopify-ticketing-app.onrender.com/api/tickets/by-order?${params.toString()}`,
           {
             method: "GET",
             headers: {

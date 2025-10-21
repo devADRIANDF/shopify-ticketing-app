@@ -11,3 +11,6 @@ handle = "order-status-qr"
 [[extensions.targeting]]
 target = "purchase.thank-you.block.render"
 module = "./src/index.tsx"
+
+[extensions.capabilities]
+network_access = true
