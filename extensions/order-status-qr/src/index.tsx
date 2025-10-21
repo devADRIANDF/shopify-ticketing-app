@@ -22,9 +22,19 @@ function Extension() {
     async function fetchTickets() {
       try {
         console.log("[QR Extension] Order confirmation:", orderConfirmation);
+        console.log("[QR Extension] Order confirmation.current:", orderConfirmation?.current);
         console.log("[QR Extension] Shop:", shop);
 
-        const orderId = orderConfirmation?.current?.id;
+        // Try different ways to get the order ID
+        let orderId = orderConfirmation?.current?.id;
+
+        if (!orderId) {
+          // Try getting from value property
+          orderId = orderConfirmation?.value?.id;
+        }
+
+        console.log("[QR Extension] Order ID found:", orderId);
+
         if (!orderId) {
           console.log("[QR Extension] No order ID found");
           setLoading(false);

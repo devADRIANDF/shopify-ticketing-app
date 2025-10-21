@@ -25,7 +25,8 @@
       "Bash(git commit -m \"Add simple setup endpoint for metafield definition\")",
       "Bash(git commit -m \"Fix: Use metafieldsSet mutation for better metafield saving\n\n- Changed from orderUpdate to metafieldsSet mutation\n- Added extensive logging to debug metafield save\n- Better error handling and reporting\n- Should now properly save metafields to orders\")",
       "Bash(git commit -m \"Debug: Check if admin exists in webhook\")",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Extension now fetches tickets from API instead of metafields\n\n- Extension calls /api/tickets/by-order endpoint\n- No longer depends on metafields (which webhooks can''t save)\n- Simpler and more reliable approach\n- Added CORS headers for cross-origin requests\n\nThis should finally make QR codes appear on thank you page!\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Extension now fetches tickets from API instead of metafields\n\n- Extension calls /api/tickets/by-order endpoint\n- No longer depends on metafields (which webhooks can''t save)\n- Simpler and more reliable approach\n- Added CORS headers for cross-origin requests\n\nThis should finally make QR codes appear on thank you page!\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"Fix: Try to access order ID from value property\")"
     ],
     "deny": [],
     "ask": []
