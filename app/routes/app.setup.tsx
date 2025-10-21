@@ -102,6 +102,79 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ success: true, message: "Settings created successfully" });
     }
 
+    if (action === "setupMetafields") {
+      try {
+        console.log("[Setup] Setting up metafields for shop:", shop);
+
+        // We need to use the admin API, so authenticate here
+        const { admin } = await authenticate.admin(request);
+
+        const mutation = `
+          mutation CreateMetafieldDefinition {
+            metafieldDefinitionCreate(
+              definition: {
+                name: "Tickets"
+                namespace: "validiam"
+                key: "tickets"
+                description: "QR code tickets data for order"
+                type: "json"
+                ownerType: ORDER
+              }
+            ) {
+              createdDefinition {
+                id
+                name
+                namespace
+                key
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `;
+
+        console.log("[Setup] Calling GraphQL mutation...");
+        const response = await admin.graphql(mutation);
+        const result = await response.json();
+
+        console.log("[Setup] GraphQL result:", JSON.stringify(result, null, 2));
+
+        if (result.data?.metafieldDefinitionCreate?.userErrors?.length > 0) {
+          const errors = result.data.metafieldDefinitionCreate.userErrors;
+          const errorMessage = errors[0]?.message || "";
+
+          // Check if it already exists
+          if (errorMessage.includes("taken") || errorMessage.includes("already exists")) {
+            console.log("[Setup] Metafield already exists - OK");
+            return json({
+              success: true,
+              message: "Metafield definition already exists"
+            });
+          }
+
+          console.error("[Setup] User errors:", errors);
+          return json({
+            success: false,
+            error: errors.map((e: any) => e.message).join(", ")
+          });
+        }
+
+        console.log("[Setup] Metafield created successfully");
+        return json({
+          success: true,
+          message: "Metafield definition created successfully"
+        });
+      } catch (metafieldError: any) {
+        console.error("[Setup] Metafield setup error:", metafieldError);
+        return json({
+          success: false,
+          error: metafieldError?.message || "Failed to setup metafields"
+        });
+      }
+    }
+
     return json({ success: false, message: "Unknown action" });
   } catch (error: any) {
     console.error("Setup action error:", error);
@@ -149,27 +222,13 @@ export default function SetupPage() {
     submit(formData, { method: "post" });
   }, [submit, shop]);
 
-  const handleSetupMetafields = useCallback(async () => {
+  const handleSetupMetafields = useCallback(() => {
     setErrorMessage("");
-    setShowSuccess(false);
-
-    try {
-      const response = await fetch(`/api/setup-metafields?shop=${shop}`, {
-        method: "POST",
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      } else {
-        setErrorMessage(result.error || "Failed to setup metafields");
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message || "Failed to setup metafields");
-    }
-  }, [shop]);
+    const formData = new FormData();
+    formData.append("action", "setupMetafields");
+    formData.append("shop", shop);
+    submit(formData, { method: "post" });
+  }, [submit, shop]);
 
   return (
     <Page
