@@ -82,7 +82,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     // Check if ticket was already marked as used
-    if (ticket.status === "used") {
+    if (ticket.status === "SCANNED") {
       return json({
         success: false,
         ticket: {
@@ -98,17 +98,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         },
         status: "used",
         message: `Entrada ya utilizada${ticket.usedAt ? ` el ${ticket.usedAt.toLocaleString('es-ES')}` : ''}`,
+      }, {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
       });
     }
 
     // Mark ticket as used
+    console.log('[Validate] Marking ticket as SCANNED');
     const updatedTicket = await prisma.ticket.update({
       where: { id: ticket.id },
       data: {
-        status: "used",
+        status: "SCANNED",
         usedAt: new Date(),
       },
     });
+    console.log('[Validate] Ticket marked as SCANNED successfully');
 
     return json({
       success: true,

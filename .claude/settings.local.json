@@ -78,7 +78,8 @@
       "Bash(curl -s \"https://shopify-ticketing-app.onrender.com/api/tickets\")",
       "Bash(powershell -Command \"try { (Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets'' -UseBasicParsing -TimeoutSec 10).Content.Substring(0, [Math]::Min(300, (Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets'' -UseBasicParsing -TimeoutSec 10).Content.Length)) } catch { $_Exception.Message }\")",
       "Bash(npm run dev)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Improve ticket validation endpoint with better logging and error handling\n\n- Removed Shopify authentication for mobile app flow\n- Added detailed logging for debugging\n- Improved CORS headers on all responses\n- Better error messages for invalid QR codes\n\nThis fixes the 500 error when scanning tickets from mobile app.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Improve ticket validation endpoint with better logging and error handling\n\n- Removed Shopify authentication for mobile app flow\n- Added detailed logging for debugging\n- Improved CORS headers on all responses\n- Better error messages for invalid QR codes\n\nThis fixes the 500 error when scanning tickets from mobile app.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit -m \"Fix: Use correct TicketStatus enum value (SCANNED instead of used)\")"
     ],
     "deny": [],
     "ask": []
