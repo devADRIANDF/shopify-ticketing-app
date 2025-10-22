@@ -37,7 +37,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         buyerEmail: true,
         createdAt: true,
         qrData: true,
-        usedAt: true,
+        scannedAt: true,
       },
     });
 
@@ -50,8 +50,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       buyerEmail: ticket.buyerEmail,
       purchaseDate: ticket.createdAt.toISOString(),
       qrCode: ticket.qrData || "",
-      scannedAt: ticket.usedAt?.toISOString(),
-      scannedBy: ticket.usedAt ? "Staff" : undefined,
+      scannedAt: ticket.scannedAt?.toISOString(),
+      scannedBy: ticket.scannedAt ? "Staff" : undefined,
     }));
 
     return json(formattedTickets, {

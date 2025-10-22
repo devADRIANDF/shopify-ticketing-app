@@ -93,11 +93,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           buyerEmail: ticket.buyerEmail,
           purchaseDate: ticket.createdAt.toISOString(),
           qrCode: ticket.qrData || "",
-          scannedAt: ticket.usedAt?.toISOString(),
+          scannedAt: ticket.scannedAt?.toISOString(),
           scannedBy: scannedBy || "Staff",
         },
         status: "used",
-        message: `Entrada ya utilizada${ticket.usedAt ? ` el ${ticket.usedAt.toLocaleString('es-ES')}` : ''}`,
+        message: `Entrada ya utilizada${ticket.scannedAt ? ` el ${ticket.scannedAt.toLocaleString('es-ES')}` : ''}`,
       }, {
         headers: {
           "Access-Control-Allow-Origin": "*",
@@ -111,7 +111,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       where: { id: ticket.id },
       data: {
         status: "SCANNED",
-        usedAt: new Date(),
+        scannedAt: new Date(),
       },
     });
     console.log('[Validate] Ticket marked as SCANNED successfully');
