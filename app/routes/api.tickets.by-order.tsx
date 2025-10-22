@@ -36,14 +36,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     console.log(`[API] Found ${tickets.length} tickets for order ${orderId || orderNumber}`);
 
-    // Return tickets with QR codes
+    // Return tickets with QR code URLs
+    // Use public endpoint URL instead of data URL for better compatibility with Shopify extensions
+    const baseUrl = new URL(request.url).origin;
+
     return json(
       {
         tickets: tickets.map((ticket) => ({
           id: ticket.id,
           productTitle: ticket.productTitle,
           shopifyOrderName: ticket.shopifyOrderName,
-          qrCodeDataUrl: ticket.qrCode, // qrCode field contains the base64 data URL
+          qrCodeDataUrl: `${baseUrl}/api/qr/${ticket.id}`, // Public URL to QR code image
           status: ticket.status,
         })),
       },

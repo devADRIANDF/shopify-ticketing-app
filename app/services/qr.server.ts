@@ -9,10 +9,11 @@ export interface GenerateQROptions {
 }
 
 /**
- * Generates a QR code image data URL
+ * Generates a QR code image data URL and SVG string
  */
 export async function generateQRCode(options: GenerateQROptions): Promise<{
   qrCodeDataUrl: string;
+  qrCodeSvg: string;
   encryptedData: string;
 }> {
   const qrData: QRData = {
@@ -28,8 +29,7 @@ export async function generateQRCode(options: GenerateQROptions): Promise<{
   // Encrypt the data
   const encryptedData = encryptQRData(qrData);
 
-  // Generate QR code as data URL
-  const qrCodeDataUrl = await QRCode.toDataURL(encryptedData, {
+  const qrOptions = {
     errorCorrectionLevel: "H",
     margin: 1,
     width: 512,
@@ -37,10 +37,23 @@ export async function generateQRCode(options: GenerateQROptions): Promise<{
       dark: "#000000",
       light: "#FFFFFF",
     },
+  };
+
+  // Generate QR code as data URL (for email)
+  const qrCodeDataUrl = await QRCode.toDataURL(encryptedData, qrOptions);
+
+  // Generate QR code as SVG string (for web display)
+  const qrCodeSvg = await QRCode.toString(encryptedData, {
+    ...qrOptions,
+    type: 'svg',
   });
+
+  // Convert SVG to data URL for better compatibility with Image components
+  const qrCodeSvgDataUrl = `data:image/svg+xml;base64,${Buffer.from(qrCodeSvg).toString('base64')}`;
 
   return {
     qrCodeDataUrl,
+    qrCodeSvg: qrCodeSvgDataUrl,
     encryptedData,
   };
 }

@@ -49,7 +49,7 @@ export async function createTicketsForLineItem(
       const ticketId = generateTicketId();
 
       // Generate QR code
-      const { qrCodeDataUrl, encryptedData } = await generateQRCode({
+      const { qrCodeDataUrl, qrCodeSvg, encryptedData } = await generateQRCode({
         entryId: ticketId,
         shopifyOrder: options.shopifyOrderName,
         buyer: options.buyerEmail,
@@ -71,7 +71,7 @@ export async function createTicketsForLineItem(
           buyerEmail: options.buyerEmail,
           buyerName: options.buyerName,
           ticketType: options.ticketType,
-          qrCode: qrCodeDataUrl,
+          qrCode: qrCodeSvg, // Save SVG instead of PNG for better compatibility
           qrData: encryptedData,
           status: "VALID",
           shop: options.shop,
