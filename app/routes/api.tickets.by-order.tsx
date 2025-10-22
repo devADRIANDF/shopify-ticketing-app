@@ -46,7 +46,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
           id: ticket.id,
           productTitle: ticket.productTitle,
           shopifyOrderName: ticket.shopifyOrderName,
-          qrCodeDataUrl: `${baseUrl}/api/qr/${ticket.id}`, // Public URL to QR code image
+          qrCodeDataUrl: `${baseUrl}/api/qr/${ticket.id}?size=200`, // Public URL with size parameter
           status: ticket.status,
         })),
       },

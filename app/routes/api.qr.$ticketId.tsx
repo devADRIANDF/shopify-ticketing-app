@@ -4,14 +4,20 @@ import { prisma } from "~/lib/db.server";
 /**
  * Public endpoint to serve QR code images
  * Returns SVG or PNG image based on ticket ID
+ * Query params: ?size=200 (optional, defaults to original size)
  */
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
   try {
     const { ticketId } = params;
 
     if (!ticketId) {
       return new Response("Missing ticket ID", { status: 400 });
     }
+
+    // Get size parameter from query string
+    const url = new URL(request.url);
+    const requestedSize = url.searchParams.get("size");
+    const targetSize = requestedSize ? parseInt(requestedSize) : null;
 
     // Get ticket from database
     const ticket = await prisma.ticket.findUnique({
@@ -26,9 +32,18 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     // If it's a data URL, extract the data
     if (ticket.qrCode.startsWith('data:image/svg+xml;base64,')) {
       const base64Data = ticket.qrCode.replace('data:image/svg+xml;base64,', '');
-      const svgBuffer = Buffer.from(base64Data, 'base64');
+      let svgContent = Buffer.from(base64Data, 'base64').toString('utf-8');
 
-      return new Response(svgBuffer, {
+      // If size is requested, modify the SVG viewBox and dimensions
+      if (targetSize) {
+        // Set explicit width and height
+        svgContent = svgContent.replace(
+          /<svg([^>]*)>/,
+          `<svg$1 width="${targetSize}" height="${targetSize}">`
+        );
+      }
+
+      return new Response(svgContent, {
         headers: {
           "Content-Type": "image/svg+xml",
           "Cache-Control": "public, max-age=31536000", // Cache for 1 year

@@ -47,7 +47,8 @@
       "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/qr/TKT-MH1R9KK5-FOVP076'' -UseBasicParsing | Select-Object StatusCode,ContentType\")",
       "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets/by-order?orderId=11615474352458'' -UseBasicParsing | Select-Object -ExpandProperty Content\")",
       "Bash(powershell -Command \"Invoke-WebRequest -Uri ''http://shopify-ticketing-app.onrender.com/api/qr/TKT-MH1R9KK5-FOVP076'' -UseBasicParsing -OutFile C:\\Users\\adlrr\\qr-test.png; Test-Path C:\\Users\\adlrr\\qr-test.png\")",
-      "Bash(git commit -m \"Fix: Use HTTPS URLs and correct field name for QR codes\")"
+      "Bash(git commit -m \"Fix: Use HTTPS URLs and correct field name for QR codes\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Improve QR code layout and size\n\nChanges:\n- Reduced QR size to 200x200px for better display\n- Changed layout to vertical for cleaner appearance\n- Added size parameter to QR endpoint for dynamic resizing\n- QR now appears below text instead of pushing it down\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

@@ -132,21 +132,21 @@ function Extension() {
             </Text>
 
             {ticket.qrCodeDataUrl && (
-              <InlineLayout columns={["fill", "auto"]} spacing="base">
-                <BlockStack spacing="tight">
-                  <Text size="small">
-                    Scan this QR code at the event entrance
-                  </Text>
-                  <Text size="small" appearance="subdued">
-                    Ticket ID: {ticket.id.substring(0, 8)}
-                  </Text>
-                </BlockStack>
-                <Image
-                  source={ticket.qrCodeDataUrl}
-                  accessibilityDescription="Event ticket QR code"
-                  border="base"
-                />
-              </InlineLayout>
+              <BlockStack spacing="tight">
+                <Text size="small">
+                  Scan this QR code at the event entrance
+                </Text>
+                <Text size="small" appearance="subdued">
+                  Ticket ID: {ticket.id.substring(0, 8)}
+                </Text>
+                <InlineLayout blockAlignment="center">
+                  <Image
+                    source={ticket.qrCodeDataUrl}
+                    accessibilityDescription="Event ticket QR code"
+                    border="base"
+                  />
+                </InlineLayout>
+              </BlockStack>
             )}
           </BlockStack>
         ))}

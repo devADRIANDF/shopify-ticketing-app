@@ -32,7 +32,7 @@ export async function generateQRCode(options: GenerateQROptions): Promise<{
   const qrOptions = {
     errorCorrectionLevel: "H",
     margin: 1,
-    width: 512,
+    width: 256, // Reduced from 512 for better display in checkout
     color: {
       dark: "#000000",
       light: "#FFFFFF",
