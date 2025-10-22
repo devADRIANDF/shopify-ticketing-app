@@ -38,7 +38,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
     // Return tickets with QR code URLs
     // Use public endpoint URL instead of data URL for better compatibility with Shopify extensions
-    const baseUrl = new URL(request.url).origin;
+    const baseUrl = new URL(request.url).origin.replace('http://', 'https://');
 
     return json(
       {

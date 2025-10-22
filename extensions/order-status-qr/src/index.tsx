@@ -80,9 +80,10 @@ function Extension() {
               id: ticket.id,
               productTitle: ticket.productTitle,
               shopifyOrderName: ticket.shopifyOrderName,
-              qrCodeDataUrl: ticket.qrCode,
+              qrCodeDataUrl: ticket.qrCodeDataUrl, // Use qrCodeDataUrl from API (was ticket.qrCode before)
               status: ticket.status,
             }));
+            console.log("[QR Extension] Formatted tickets with QR URLs:", formattedTickets.map(t => ({ id: t.id, qrUrl: t.qrCodeDataUrl })));
             setTickets(formattedTickets);
             setLoading(false);
             return;
