@@ -14,3 +14,8 @@ module = "./src/index.tsx"
 
 [extensions.capabilities]
 network_access = true
+
+[extensions.capabilities.network_access]
+fetch = [
+  "https://shopify-ticketing-app.onrender.com/*"
+]
