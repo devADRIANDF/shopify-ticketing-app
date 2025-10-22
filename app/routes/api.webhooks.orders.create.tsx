@@ -50,6 +50,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim()
       : undefined;
 
+    const buyerPhone = customer?.phone || order.phone || undefined;
+
     // Process each line item
     const allTickets = [];
 
@@ -112,6 +114,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         quantity: lineItem.quantity,
         buyerEmail,
         buyerName,
+        buyerPhone,
         ticketType: lineItem.variant_title || lineItem.title,
         shop,
         eventDate,

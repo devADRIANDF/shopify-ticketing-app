@@ -15,6 +15,7 @@ export interface CreateTicketOptions {
   quantity: number;
   buyerEmail: string;
   buyerName?: string;
+  buyerPhone?: string;
   ticketType: string;
   shop: string;
   eventDate?: Date;
@@ -70,6 +71,7 @@ export async function createTicketsForLineItem(
           quantity: 1,
           buyerEmail: options.buyerEmail,
           buyerName: options.buyerName,
+          buyerPhone: options.buyerPhone,
           ticketType: options.ticketType,
           qrCode: qrCodeSvg, // Save SVG instead of PNG for better compatibility
           qrData: encryptedData,
