@@ -34,12 +34,16 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
       const base64Data = ticket.qrCode.replace('data:image/svg+xml;base64,', '');
       let svgContent = Buffer.from(base64Data, 'base64').toString('utf-8');
 
-      // If size is requested, modify the SVG viewBox and dimensions
+      // If size is requested, modify the SVG dimensions
       if (targetSize) {
-        // Set explicit width and height
+        // Remove existing width and height attributes, then add new ones
         svgContent = svgContent.replace(
           /<svg([^>]*)>/,
-          `<svg$1 width="${targetSize}" height="${targetSize}">`
+          (match, attrs) => {
+            // Remove any existing width/height attributes
+            let cleanAttrs = attrs.replace(/\s*width="[^"]*"/g, '').replace(/\s*height="[^"]*"/g, '');
+            return `<svg${cleanAttrs} width="${targetSize}" height="${targetSize}">`;
+          }
         );
       }
 
