@@ -38,6 +38,7 @@ model Ticket {
   quantity      Int      @default(1)
   buyerEmail    String
   buyerName     String?
+  buyerPhone    String?
   ticketType    String
   qrCode        String   // QR code data URL (base64 image)
   qrData        String   // Encrypted JSON data

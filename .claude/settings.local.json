@@ -79,7 +79,20 @@
       "Bash(powershell -Command \"try { (Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets'' -UseBasicParsing -TimeoutSec 10).Content.Substring(0, [Math]::Min(300, (Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets'' -UseBasicParsing -TimeoutSec 10).Content.Length)) } catch { $_Exception.Message }\")",
       "Bash(npm run dev)",
       "Bash(git commit -m \"$(cat <<''EOF''\nFix: Improve ticket validation endpoint with better logging and error handling\n\n- Removed Shopify authentication for mobile app flow\n- Added detailed logging for debugging\n- Improved CORS headers on all responses\n- Better error messages for invalid QR codes\n\nThis fixes the 500 error when scanning tickets from mobile app.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git commit -m \"Fix: Use correct TicketStatus enum value (SCANNED instead of used)\")"
+      "Bash(git commit -m \"Fix: Use correct TicketStatus enum value (SCANNED instead of used)\")",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets'' -UseBasicParsing | Select-Object StatusCode,StatusDescription\")",
+      "Bash(timeout 10 bash -c \"sleep 10\")",
+      "Bash(powershell -Command \"try { $response = Invoke-WebRequest -Uri ''https://shopify-ticketing-app.onrender.com/api/tickets'' -UseBasicParsing -TimeoutSec 15; $response.StatusCode } catch { $_Exception.Message }\")",
+      "Bash(curl -s -w \"\\nHTTP_CODE:%{http_code}\" https://shopify-ticketing-app.onrender.com/api/tickets)",
+      "Bash(curl -s -I https://shopify-ticketing-app.onrender.com)",
+      "Bash(curl -s https://shopify-ticketing-app.onrender.com/api/tickets)",
+      "Bash(git add app/routes/api.tickets.*.tsx)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Change usedAt to scannedAt to match Prisma schema\n\nThe Prisma schema defines the field as scannedAt, not usedAt.\nThis was causing validation errors when trying to update tickets.\n\nFixed in:\n- api.tickets.validate.tsx\n- api.tickets._index.tsx\n- api.tickets.search.tsx\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(timeout 30 bash -c \"sleep 30\")",
+      "Bash(DATABASE_URL=\"postgresql://postgres.pbddvlgjallejkczsizt:Validiam123!@aws-1-eu-north-1.pooler.supabase.com:5432/postgres\" npx prisma migrate deploy)",
+      "Bash(npx prisma migrate dev --name add_buyer_phone)",
+      "Bash(DATABASE_URL=\"postgresql://postgres.pbddvlgjallejkczsizt:Validiam123!@aws-1-eu-north-1.pooler.supabase.com:5432/postgres\" npx prisma migrate dev --name add_buyer_phone)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFeature: Show more ticket info in mobile scanner\n\nBackend changes:\n- Added buyerPhone field to Prisma schema\n- Updated validation endpoint to return variantTitle, buyerName, buyerPhone\n- Returns complete ticket information for both valid and used tickets\n\nMobile app changes (in separate repo):\n- Updated Ticket interface with new fields\n- Redesigned scanner UI to show all ticket details\n- Changed from auto-close (3s) to manual close with button\n- Added emoji icons and better formatting\n- Shows: Event, Ticket Type (variant), Name, Email, Phone, Scan time\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
