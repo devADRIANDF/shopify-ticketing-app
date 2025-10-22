@@ -14,4 +14,3 @@ module = "./src/index.tsx"
 
 [extensions.capabilities]
 network_access = true
-api_access = true
