@@ -12,68 +12,51 @@ import { decryptQRData } from "~/lib/encryption.server";
  * Supports both Shopify app proxy auth and mobile app (public) access
  */
 export const action = async ({ request }: ActionFunctionArgs) => {
-  try {
-    // Try to authenticate with Shopify (for app usage)
-    // If it fails, continue as public endpoint (for mobile app)
-    let isAuthenticated = false;
-    try {
-      const { session } = await authenticate.public.appProxy(request);
-      if (session) {
-        isAuthenticated = true;
-      }
-    } catch (e) {
-      // Continue as public endpoint
-    }
+  console.log('[Validate] Request received');
 
+  try {
     const body = await request.json();
+    console.log('[Validate] Body:', JSON.stringify(body).substring(0, 200));
+
     const { qrData, qrCode, scannedBy, userId } = body;
 
     // Support both qrData (old) and qrCode (mobile app) parameters
     const qrInput = qrCode || qrData;
 
     if (!qrInput) {
-      return json({ error: "QR data is required" }, { status: 400 });
-    }
-
-    // If authenticated with Shopify, use the existing flow
-    if (isAuthenticated) {
-      const validationResult = await validateTicket(qrInput, "");
-
-      if (!validationResult.valid) {
-        return json({
-          valid: false,
-          error: validationResult.error,
-          ticket: validationResult.ticket,
-        });
-      }
-
-      const updateResult = await updateTicketStatus(
-        validationResult.ticket!.id,
-        "used",
-        scannedBy
-      );
-
-      if (!updateResult.success) {
-        return json({ error: updateResult.error }, { status: 500 });
-      }
-
+      console.log('[Validate] Missing QR input');
       return json({
-        valid: true,
-        ticket: updateResult.ticket,
-        message: "Ticket scanned successfully",
+        success: false,
+        status: "invalid",
+        message: "QR data is required"
+      }, {
+        status: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
       });
     }
+
+    console.log('[Validate] QR input received, length:', qrInput.length);
 
     // Mobile app flow - decrypt and validate QR code
     let qrDecrypted;
     try {
+      console.log('[Validate] Attempting to decrypt QR');
       qrDecrypted = decryptQRData(qrInput);
+      console.log('[Validate] QR decrypted successfully, entry_id:', qrDecrypted.entry_id);
     } catch (error) {
+      console.error('[Validate] Decryption failed:', error);
       return json({
         success: false,
         status: "invalid",
         message: "Código QR no válido o corrupto",
-      }, { status: 400 });
+      }, {
+        status: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        }
+      });
     }
 
     // Validate QR data structure
