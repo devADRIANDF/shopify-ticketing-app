@@ -51,9 +51,10 @@ function Extension() {
         const apiUrl = `https://shopify-ticketing-app.onrender.com/api/tickets/by-order?${params.toString()}`;
 
         // Retry logic: webhook might not have created tickets yet
-        // Try up to 5 times with increasing delays
-        const maxRetries = 5;
-        const delays = [1000, 2000, 3000, 4000, 5000]; // 1s, 2s, 3s, 4s, 5s
+        // Shopify webhooks can take 25-30 seconds to process
+        // Try up to 10 times with delays totaling ~45 seconds
+        const maxRetries = 10;
+        const delays = [2000, 3000, 3000, 4000, 4000, 5000, 5000, 5000, 5000, 5000]; // Total: ~45s
 
         for (let attempt = 0; attempt < maxRetries; attempt++) {
           console.log(`[QR Extension] Fetch attempt ${attempt + 1}/${maxRetries}`);
