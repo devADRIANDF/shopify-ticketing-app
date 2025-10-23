@@ -92,3 +92,19 @@ model AppSettings {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
+
+model affiliates {
+  id                      String   @id @default(uuid())
+  name                    String
+  email                   String   @unique
+  unique_code             String   @unique
+  shopify_discount_code   String?
+  commission_type         String
+  commission_value        Float
+  total_sales             Int      @default(0)
+  total_commission        Float    @default(0)
+  created_at              DateTime @default(now())
+  updated_at              DateTime @default(now()) @updatedAt
+
+  @@map("affiliates")
+}
