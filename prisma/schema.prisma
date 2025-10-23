@@ -98,6 +98,7 @@ model affiliates {
   name                    String
   email                   String   @unique
   unique_code             String   @unique
+  access_token            String?  @unique // Token privado para acceder a su panel
   shopify_discount_code   String?
   commission_type         String
   commission_value        Float
