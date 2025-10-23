@@ -50,11 +50,14 @@ model Ticket {
   updatedAt     DateTime @updatedAt
   eventDate     DateTime?
   eventName     String?
+  affiliateId   String?  // ID of affiliate who generated this sale
+  price         Float?   // Price per ticket for commission calculation
 
   @@index([shop])
   @@index([shopifyOrderId])
   @@index([status])
   @@index([buyerEmail])
+  @@index([affiliateId])
 }
 
 enum TicketStatus {

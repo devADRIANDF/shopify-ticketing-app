@@ -52,14 +52,44 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     const buyerPhone = customer?.phone || order.phone || undefined;
 
+    // Check for affiliate discount codes
+    let affiliateId: string | null = null;
+    let affiliateCommissionPercent = 0;
+
+    if (order.discount_codes && order.discount_codes.length > 0) {
+      const discountCode = order.discount_codes[0].code; // Usar el primer código
+      console.log(`[Webhook] Discount code detected: ${discountCode}`);
+
+      // Buscar afiliado por código de descuento
+      const affiliate = await prisma.affiliates.findFirst({
+        where: {
+          OR: [
+            { shopify_discount_code: discountCode },
+            { unique_code: discountCode },
+          ],
+        },
+      });
+
+      if (affiliate) {
+        affiliateId = affiliate.id;
+        if (affiliate.commission_type === 'percentage') {
+          affiliateCommissionPercent = Number(affiliate.commission_value);
+        }
+        console.log(`[Webhook] Affiliate found: ${affiliate.name} (${affiliateCommissionPercent}% commission)`);
+      }
+    }
+
     // Process each line item
     const allTickets = [];
+    let totalCommissionAmount = 0;
 
     for (const lineItem of line_items) {
       console.log(`[Webhook] Processing line item:`, {
         id: lineItem.id,
         title: lineItem.title,
         product_id: lineItem.product_id,
+        price: lineItem.price,
+        quantity: lineItem.quantity,
         tags: lineItem.tags || 'no tags field'
       });
 
@@ -102,6 +132,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
       const eventDate = eventDateStr ? new Date(eventDateStr) : undefined;
 
+      // Get ticket price (price per unit)
+      const ticketPrice = parseFloat(lineItem.price) || 0;
+
       // Create tickets
       const result = await createTicketsForLineItem({
         shopifyOrderId: String(orderId),
@@ -119,6 +152,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         shop,
         eventDate,
         eventName,
+        affiliateId: affiliateId || undefined,
+        price: ticketPrice,
       });
 
       if (result.success) {
@@ -127,8 +162,35 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           `[Webhook] [${ticketCreatedTime}] ✅ Created ${result.tickets.length} tickets for line item ${lineItem.id}`
         );
         allTickets.push(...result.tickets);
+
+        // Calculate commission for this line item if affiliate exists
+        if (affiliateId && affiliateCommissionPercent > 0) {
+          const lineItemTotal = ticketPrice * lineItem.quantity;
+          const commissionForLineItem = (lineItemTotal * affiliateCommissionPercent) / 100;
+          totalCommissionAmount += commissionForLineItem;
+          console.log(`[Webhook] Commission for line item: $${commissionForLineItem.toFixed(2)} (${affiliateCommissionPercent}% of $${lineItemTotal.toFixed(2)})`);
+        }
       } else {
         console.error(`[Webhook] Failed to create tickets: ${result.error}`);
+      }
+    }
+
+    // Update affiliate statistics if commission was earned
+    if (affiliateId && totalCommissionAmount > 0 && allTickets.length > 0) {
+      try {
+        console.log(`[Webhook] Updating affiliate ${affiliateId} with ${allTickets.length} sales and $${totalCommissionAmount.toFixed(2)} commission`);
+
+        await prisma.affiliates.update({
+          where: { id: affiliateId },
+          data: {
+            total_sales: { increment: allTickets.length },
+            total_commission: { increment: totalCommissionAmount },
+          },
+        });
+
+        console.log(`[Webhook] ✅ Affiliate statistics updated successfully`);
+      } catch (error) {
+        console.error(`[Webhook] ❌ Error updating affiliate statistics:`, error);
       }
     }
 

@@ -20,6 +20,8 @@ export interface CreateTicketOptions {
   shop: string;
   eventDate?: Date;
   eventName?: string;
+  affiliateId?: string;
+  price?: number;
 }
 
 /**
@@ -79,6 +81,8 @@ export async function createTicketsForLineItem(
           shop: options.shop,
           eventDate: options.eventDate,
           eventName: options.eventName,
+          affiliateId: options.affiliateId,
+          price: options.price,
         },
       });
 
