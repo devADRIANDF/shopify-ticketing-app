@@ -76,11 +76,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     // Step 3: Create test affiliate
+    const accessToken = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
+
     const affiliate = await prisma.affiliates.create({
       data: {
         name: 'Pedro Promotor',
         email: 'pedro@example.com',
         unique_code: 'PEDRO2024',
+        access_token: accessToken,
         shopify_discount_code: 'PEDRO10',
         commission_type: 'percentage',
         commission_value: 10,
@@ -97,13 +100,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       affiliate,
       instructions: {
         landing_page: 'http://localhost:3002/PEDRO2024',
+        affiliate_panel: `http://localhost:3002/affiliate-panel/${accessToken}`,
         discount_code: 'PEDRO10',
         admin_panel: 'http://localhost:3002/affiliates',
         next_steps: [
           '1. Visit http://localhost:3002/affiliates to see all affiliates',
           '2. Create new affiliates from the control panel',
           '3. Visit http://localhost:3002/PEDRO2024 to see the public landing page',
-          '4. In Shopify, create a discount code "PEDRO10" with 0% discount for tracking'
+          `4. Visit http://localhost:3002/affiliate-panel/${accessToken} for Pedro's private dashboard`,
+          '5. In Shopify, create a discount code "PEDRO10" with 0% discount for tracking'
         ]
       }
     }), {
