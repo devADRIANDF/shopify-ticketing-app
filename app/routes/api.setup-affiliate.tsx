@@ -54,18 +54,33 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     // Step 2: Check if affiliate already exists
-    const existing = await prisma.affiliates.findFirst({
+    let existing = await prisma.affiliates.findFirst({
       where: { unique_code: 'PEDRO2024' }
     });
 
     if (existing) {
       console.log('[Setup] Affiliate already exists');
+
+      // If no access_token, generate one
+      if (!existing.access_token) {
+        console.log('[Setup] Generating access token for existing affiliate');
+        const accessToken = `${Math.random().toString(36).substring(2)}${Date.now().toString(36)}`;
+
+        existing = await prisma.affiliates.update({
+          where: { id: existing.id },
+          data: { access_token: accessToken }
+        });
+
+        console.log('[Setup] ✅ Access token generated');
+      }
+
       return new Response(JSON.stringify({
         success: true,
         message: 'Affiliate system ready! Affiliate already exists.',
         affiliate: existing,
         instructions: {
           landing_page: 'http://localhost:3002/PEDRO2024',
+          affiliate_panel: `http://localhost:3002/affiliate-panel/${existing.access_token}`,
           discount_code: 'PEDRO10',
           admin_panel: 'http://localhost:3002/affiliates'
         }
