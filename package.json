@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "remix dev",
-    "build": "prisma generate && prisma migrate deploy && remix build",
-    "start": "node server.js",
+    "build": "prisma generate && remix build",
+    "start": "prisma migrate deploy && node server.js",
     "deploy": "npx shopify app deploy --force",
     "setup": "prisma generate && prisma migrate deploy",
     "prisma:generate": "prisma generate",
